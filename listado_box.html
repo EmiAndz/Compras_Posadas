@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Listado de Productos</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .productos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .producto-box {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(44,164,93,0.09);
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      transition: box-shadow 0.2s, transform 0.2s;
+      border: 1px solid #e6f6ee;
+    }
+    .producto-box:hover {
+      box-shadow: 0 8px 24px rgba(44,164,93,0.18);
+      transform: translateY(-4px) scale(1.03);
+      border-color: #2fa15a33;
+    }
+    .producto-nombre {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #228b49;
+    }
+    .producto-categoria {
+      font-size: 0.98rem;
+      color: #2fa15a;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .producto-precio {
+      font-size: 1.08rem;
+      font-weight: 600;
+      color: #155d2d;
+      margin-bottom: 6px;
+    }
+    .producto-tienda {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 2px;
+    }
+    .producto-id {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="topbar__wrap">
+      <a class="brand" href="#">Compras Posadas</a>
+      <!-- Puedes agregar aquí el buscador y los botones si lo deseas -->
+    </div>
+  </header>
+
+  <h1 style="text-align:center; margin-top:32px;">Listado de Productos</h1>
+  <section class="productos-grid">
+    <div class="producto-box">
+      <div class="producto-nombre">Samsung S25</div>
+      <div class="producto-categoria">Tecnología</div>
+      <div class="producto-precio">$520.000</div>
+      <div class="producto-tienda">Samsung Store</div>
+      <div class="producto-id">ID: 001</div>
+    </div>
+    <div class="producto-box">
+      <div class="producto-nombre">Perfume Yves Saint Laurent</div>
+      <div class="producto-categoria">Perfumería</div>
+      <div class="producto-precio">$65.000</div>
+      <div class="producto-tienda">Fragancias Posadas</div>
+      <div class="producto-id">ID: 002</div>
+    </div>
+    <div class="producto-box">
+      <div class="producto-nombre">Notebook IdeaPad 3</div>
+      <div class="producto-categoria">Tecnología</div>
+      <div class="producto-precio">$420.000</div>
+      <div class="producto-tienda">TecnoShop Posadas</div>
+      <div class="producto-id">ID: 003</div>
+    </div>
+    <div class="producto-box">
+      <div class="producto-nombre">Auriculares JBL</div>
+      <div class="producto-categoria">Audio</div>
+      <div class="producto-precio">$32.000</div>
+      <div class="producto-tienda">ElectroShop</div>
+      <div class="producto-id">ID: 004</div>
+    </div>
+    <div class="producto-box">
+      <div class="producto-nombre">Televisor Samsung 23"</div>
+      <div class="producto-categoria">Electrónica</div>
+      <div class="producto-precio">$110.000</div>
+      <div class="producto-tienda">Samsung Store</div>
+      <div class="producto-id">ID: 005</div>
+    </div>
+  </section>
+</body>
+</html>

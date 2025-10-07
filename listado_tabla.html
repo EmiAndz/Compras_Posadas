@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Listado de Productos</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .tabla-productos {
+      width: 90%;
+      margin: 32px auto;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(44,164,93,0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .tabla-productos th, .tabla-productos td {
+      padding: 14px 18px;
+      text-align: left;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .tabla-productos th {
+      background: #2fa15a;
+      color: #fff;
+      font-size: 1.08rem;
+      font-weight: 600;
+    }
+    .tabla-productos tr:last-child td {
+      border-bottom: none;
+    }
+    .tabla-productos tr:hover td {
+      background: #f6fff9;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center; margin-top:32px;">Listado de Productos</h1>
+  <table class="tabla-productos">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Producto</th>
+        <th>Categoría</th>
+        <th>Precio</th>
+        <th>Tienda</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>001</td>
+        <td>Samsung S25</td>
+        <td>Tecnología</td>
+        <td>$520.000</td>
+        <td>Samsung Store</td>
+      </tr>
+      <tr>
+        <td>002</td>
+        <td>Perfume Yves Saint Laurent</td>
+        <td>Perfumería</td>
+        <td>$65.000</td>
+        <td>Fragancias Posadas</td>
+      </tr>
+      <tr>
+        <td>003</td>
+        <td>Notebook IdeaPad 3</td>
+        <td>Tecnología</td>
+        <td>$420.000</td>
+        <td>TecnoShop Posadas</td>
+      </tr>
+      <tr>
+        <td>004</td>
+        <td>Auriculares JBL</td>
+        <td>Audio</td>
+        <td>$32.000</td>
+        <td>ElectroShop</td>
+      </tr>
+      <tr>
+        <td>005</td>
+        <td>Televisor Samsung 23"</td>
+        <td>Electrónica</td>
+        <td>$110.000</td>
+        <td>Samsung Store</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

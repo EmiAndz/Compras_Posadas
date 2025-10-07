@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compras Posadas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar__wrap">
+      <a class="brand" href="#">
+        <span class="logo-icon"></span>
+        <span class="brand__name"><strong>Compras</strong> Posadas</span>
+      </a>
+      <form class="search" role="search" aria-label="Buscar productos">
+        <input 
+          type="search" 
+          placeholder="Buscar por producto, categoría, tienda" 
+          aria-label="Buscar producto" 
+        />
+        <button type="submit" class="btn-icon" aria-label="Buscar">
+          <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+            <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </form>
+      <nav class="actions">
+        <a href="#" class="action-btn">Iniciar sesión</a>
+        <a href="#" class="action-btn">Lista deseos</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container layout">
+    <!-- Sidebar de categorías -->
+    <aside class="sidebar">
+      <h2 class="sidebar__title">Categorías</h2>
+      <nav class="sidebar__nav">
+        <a href="#"><span>📱</span> Celulares</a>
+        <a href="#"><span>🖥️</span> Electrónica</a>
+        <a href="#"><span>💄</span> Cosmetica</a>
+        <a href="#"><span>💻</span> Informática</a>
+        <a href="#"><span>🏕️</span> Camping</a>
+        <a href="#"><span>🍏</span> Apple</a>
+        <a href="#"><span>👕</span> Indumentaria</a>
+        <a href="#"><span>👟</span> Calzado</a>
+        <a href="#"><span>🏷️</span> Ofertas y descuentos</a>
+        <a href="#"><span>🗂️</span> Todas las categorías</a>
+      </nav>
+    </aside>
+
+    <!-- Área principal -->
+    <main class="main">
+
+      <!-- Carrusel/Slider de banners -->
+      <section class="carousel" aria-label="Banners promocionales">
+        <div class="carousel__viewport">
+          <div class="carousel__slide" data-index="0" style="background-image:url('img/copalibertadores.jpg');">
+            <div class="carousel__content">
+              <h2>¡Ofertas en Smartphones!</h2>
+              <p>Descubre los mejores precios en tecnología móvil.</p>
+              <a href="listado_box.html" class="carousel__btn">Ver productos</a>
+            </div>
+          </div>
+          <div class="carousel__slide" data-index="1" style="background-image:url('img/samsung_s25.jpg');">
+            <div class="carousel__content">
+              <h2>Perfumes exclusivos</h2>
+              <p>Fragancias originales a precios únicos.</p>
+              <a href="listado_box.html" class="carousel__btn">Ver perfumes</a>
+            </div>
+          </div>
+          <div class="carousel__slide" data-index="2" style="background-image:url('img/notebook.jpg');">
+            <div class="carousel__content">
+              <h2>Notebooks y más</h2>
+              <p>Equipos para estudiar y trabajar al mejor precio.</p>
+              <a href="listado_box.html" class="carousel__btn">Ver notebooks</a>
+            </div>
+          </div>
+        </div>
+        <button class="carousel__nav carousel__nav--prev" aria-label="Anterior">&#10094;</button>
+        <button class="carousel__nav carousel__nav--next" aria-label="Siguiente">&#10095;</button>
+        <div class="carousel__dots" role="tablist"></div>
+      </section>
+
+      <!-- Productos destacados -->
+      <section class="featured">
+        <h2>Destacados</h2>
+        <div class="cards">
+          <a class="card" href="producto.html">
+            <img src="img/perfume.jpg" alt="Perfume" />
+            <h3>Perfume</h3>
+            <p>$300</p>
+          </a>
+          <a class="card" href="producto.html">
+            <img src="img/smartphone.jpg" alt="Smartphone" />
+            <h3>Smartphone</h3>
+            <p>$450</p>
+          </a>
+          <a class="card" href="producto.html">
+            <img src="img/notebook.jpg" alt="Notebook" />
+            <h3>Notebook</h3>
+            <p>$1200</p>
+          </a>
+          <a class="card" href="producto.html">
+            <img src="img/auriculares.jpg" alt="Auriculares" />
+            <h3>Auriculares</h3>
+            <p>$80</p>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ...contenido principal... -->
+  <footer class="footer">
+    <div class="footer__wrap">
+      © 2025 Compras Posadas — Hecho para comparar precios en Posadas, Misiones.
+    </div>
+  </footer>
+  <script src="scrip.js"></script>
+</body>
+</html>
+
+<style>
+/* === Carousel/Slider Styles (actualizado) === */
+.carousel__slide {
+  min-width: 100%;
+  height: clamp(300px, 45vw, 520px); /* Altura responsiva y mayor */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.carousel__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(35,138,73,0.13); /* Verde suave */
+  color: #238a49;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(35,138,73,0.10);
+  transition: background 0.2s, color 0.2s;
+}
+.carousel__nav--prev { left: 18px; }
+.carousel__nav--next { right: 18px; }
+.carousel__nav:hover {
+  background: #238a49;
+  color: #fff;
+}
+
+/* ...resto del CSS del carrusel permanece igual... */
+</style>

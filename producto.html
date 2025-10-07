@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ficha de Producto</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .producto-ficha {
+      max-width: 640px;
+      margin: 48px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(44,164,93,0.10);
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .producto-img {
+      width: 260px;
+      height: 260px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      background: #e6f6ee;
+      display: block;
+    }
+    .producto-nombre {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #228b49;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .producto-categoria {
+      font-size: 1.08rem;
+      color: #2fa15a;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .producto-precio {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #155d2d;
+      margin-bottom: 12px;
+    }
+    .producto-tienda {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .producto-id {
+      font-size: 0.92rem;
+      color: #aaa;
+      margin-bottom: 18px;
+    }
+    .producto-descripcion {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .producto-detalles {
+      width: 100%;
+      background: #f6fff9;
+      border-radius: 10px;
+      padding: 18px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 6px rgba(44,164,93,0.07);
+    }
+    .producto-detalles h3 {
+      font-size: 1.08rem;
+      color: #228b49;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .producto-detalles ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #155d2d;
+      font-size: 0.98rem;
+    }
+    .producto-garantia {
+      font-size: 0.98rem;
+      color: #2fa15a;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .producto-stock {
+      font-size: 0.98rem;
+      color: #228b49;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .btn-comprar {
+      background: var(--green-700, #228b49);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 32px;
+      font-size: 1.08rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(44,164,93,0.09);
+    }
+    .btn-comprar:hover {
+      background: var(--green-600, #2fa15a);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <section class="producto-ficha">
+    <img src="notebook.jpg" alt="Notebook Lenovo IdeaPad 3" class="producto-img" />
+    <div class="producto-nombre">Notebook Lenovo IdeaPad 3</div>
+    <div class="producto-categoria">Tecnología</div>
+    <div class="producto-precio">$420.000</div>
+    <div class="producto-tienda">TecnoShop Posadas</div>
+    <div class="producto-id">ID: 01023</div>
+    <div class="producto-stock">Stock disponible: 7 unidades</div>
+    <div class="producto-garantia">Garantía: 12 meses oficial</div>
+    <div class="producto-descripcion">
+      Notebook Lenovo IdeaPad 3 con procesador Intel Core i5, 8GB RAM, 512GB SSD, pantalla Full HD de 15.6". Ideal para trabajo, estudio y entretenimiento.
+    </div>
+    <div class="producto-detalles">
+      <h3>Características técnicas</h3>
+      <ul>
+        <li>Procesador: Intel Core i5-1135G7</li>
+        <li>Memoria RAM: 8GB DDR4</li>
+        <li>Almacenamiento: 512GB SSD</li>
+        <li>Pantalla: 15.6" Full HD (1920x1080)</li>
+        <li>Gráficos: Intel Iris Xe</li>
+        <li>Sistema operativo: Windows 11 Home</li>
+        <li>Conectividad: WiFi, Bluetooth, HDMI, USB 3.1</li>
+        <li>Batería: Hasta 7 horas de autonomía</li>
+        <li>Peso: 1.65 kg</li>
+      </ul>
+    </div>
+    <button class="btn-comprar">Comprar</button>
+  </section>
+</body>
+</html>
