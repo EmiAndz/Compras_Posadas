@@ -2,7 +2,7 @@
 .carousel {
   position: relative;
   width: 100%;
-  max-width: 1100px;
+  max-width: 100%; /* ancho completo del contenedor */
   margin: 32px auto 36px auto;
   border-radius: 18px;
   box-shadow: 0 4px 32px rgba(35,138,73,0.13);
@@ -16,7 +16,7 @@
 }
 .carousel__slide {
   min-width: 100%;
-  height: 270px;
+  height: clamp(340px, 46vw, 560px); /* altura reducida */
   background-size: cover;
   background-position: center;
   display: flex;
@@ -27,11 +27,11 @@
 .carousel__content {
   background: rgba(35,138,73,0.82);
   color: #fff;
-  padding: 32px 36px;
+  padding: 24px 28px; /* padding escalado */
   border-radius: 14px;
   margin-left: 48px;
   box-shadow: 0 2px 12px rgba(35,138,73,0.13);
-  max-width: 350px;
+  max-width: min(560px, 42vw); /* tamaño responsivo mejorado */
 }
 .carousel__content h2 {
   font-size: 1.6rem;
@@ -65,9 +65,9 @@
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  font-size: 2rem;
+  width: 48px; /* tamaño reducido */
+  height: 48px; /* tamaño reducido */
+  font-size: 22px; /* font-size ajustado */
   cursor: pointer;
   z-index: 2;
   transition: background 0.2s;
@@ -80,15 +80,15 @@
 .carousel__nav:hover { background: #1d7a3f; }
 .carousel__dots {
   position: absolute;
-  left: 0; right: 0; bottom: 18px;
+  left: 0; right: 0; bottom: 14px; /* bottom ajustado */
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 14px; /* spacing mayor */
   z-index: 2;
 }
 .carousel__dots button {
-  width: 13px;
-  height: 13px;
+  width: 10px; /* tamaño reducido */
+  height: 10px; /* tamaño reducido */
   border-radius: 50%;
   border: none;
   background: #e6f6ee;
@@ -98,20 +98,23 @@
 }
 .carousel__dots button.active {
   background: #238a49;
-  transform: scale(1.18);
+  width: 24px; /* dot activo más ancho */
+  border-radius: 12px; /* ajustar border-radius para la forma alargada */
+  transform: scale(1);
 }
 @media (max-width: 700px) {
-  .carousel__slide { height: 170px; }
+  .carousel__slide { height: clamp(240px, 45vw, 380px); } /* altura responsiva móvil */
   .carousel__content {
     margin-left: 12px;
-    padding: 16px 12px;
-    max-width: 220px;
+    padding: 18px 16px; /* padding proporcional */
+    max-width: min(280px, 38vw); /* ancho responsivo móvil */
   }
   .carousel__content h2 { font-size: 1.1rem; }
   .carousel__content p { font-size: 0.95rem; }
   .carousel__btn { padding: 7px 14px; font-size: 0.98rem; }
-  .carousel__nav { width: 32px; height: 32px; font-size: 1.3rem; }
-  .carousel__dots { bottom: 8px; }
+  .carousel__nav { width: 42px; height: 42px; font-size: 18px; } /* proporciones móviles */
+  .carousel__dots { bottom: 8px; gap: 10px; }
+  .carousel__dots button { width: 10px; height: 10px; } /* dots más pequeños en móvil */
 }
 :root {
   --green-900: #155d2d;
@@ -131,8 +134,9 @@ body {
   min-height: 100vh;
   background: var(--green-100);
   font-family: 'Segoe UI', Arial, sans-serif;
-  /* Asegura espacio para el footer fijo */
-  padding-bottom: 56px; /* igual o mayor al alto del footer */
+  /* Layout flexbox para empujar footer al fondo */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Topbar */
@@ -398,20 +402,22 @@ body {
 
 /* Footer */
 .footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100vw;
-  background: linear-gradient(90deg, var(--green-800), var(--green-600));
-  color: var(--white);
-  padding: 16px 0;
+  background: var(--green-700);
+  color: #e9ffe8;
+  padding: 8px 0;
+  font-size: 0.82rem;
   text-align: center;
-  z-index: 100;
+  letter-spacing: .2px;
+  margin-top: auto; /* empuja al fondo con flexbox */
 }
 
 .footer__wrap {
   margin: 0 auto;
   max-width: 1200px;
+}
+
+.footer__wrap small { 
+  opacity: .95; 
 }
 
 /* Responsive */
