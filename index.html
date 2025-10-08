@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Compras Posadas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
@@ -34,10 +35,48 @@
     </div>
   </header>
 
+  <!-- Barra de navegación superior (Desktop) -->
+  <nav class="desktop-nav" aria-label="Navegación principal desktop">
+    <div class="desktop-nav__wrap">
+      <a href="index.html" class="desktop-nav__item active">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      
+      <a href="listado_box.html" class="desktop-nav__item">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 20C21 18.9391 20.5786 17.9217 19.8284 17.1716C19.0783 16.4214 18.0609 16 17 16H9C7.93913 16 6.92172 16.4214 6.17157 17.1716C5.42143 17.9217 5 18.9391 5 20M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 21V19C19 18.1974 18.7205 17.4204 18.2207 16.8056C17.7209 16.1908 17.0332 15.7759 16.26 15.64M15 3.13C15.7739 3.26531 16.4622 3.68167 16.9629 4.29790C17.4636 4.91413 17.7436 5.69240 17.7436 6.49635C17.7436 7.30030 17.4636 8.07857 16.9629 8.69480C16.4622 9.31103 15.7739 9.72739 15 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Tiendas</span>
+      </a>
+      
+      <a href="#" class="desktop-nav__item">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Ubicaciones</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Botón de menú móvil -->
+  <button class="mobile-menu-btn" aria-label="Abrir menú de categorías" aria-expanded="false">
+    <span class="mobile-menu-btn__icon">☰</span>
+    <span class="mobile-menu-btn__text">Categorías</span>
+  </button>
+
   <div class="container layout">
     <!-- Sidebar de categorías -->
-    <aside class="sidebar">
-      <h2 class="sidebar__title">Categorías</h2>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <h2 class="sidebar__title">Categorías</h2>
+        <button class="sidebar__close" aria-label="Cerrar menú">✕</button>
+      </div>
       <nav class="sidebar__nav">
         <a href="#"><span>📱</span> Celulares</a>
         <a href="#"><span>🖥️</span> Electrónica</a>
@@ -111,6 +150,261 @@
           </a>
         </div>
       </section>
+
+      <!-- Productos recomendados -->
+      <section role="region" aria-label="Productos recomendados" class="py-8 px-4 max-w-7xl mx-auto">
+        <div class="grid grid-cols-12 gap-6 lg:gap-8">
+          <!-- Banner fijo izquierda -->
+          <div class="col-span-12 lg:col-span-3">
+            <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800 p-6 h-full min-h-[300px] flex flex-col justify-center items-center text-white">
+              <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+              <div class="relative z-10 text-center">
+                <div class="mb-4">
+                  <div class="text-sm font-semibold text-green-400 mb-2">Productos exclusivos</div>
+                  <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4">RECOMENDADOS</h2>
+                </div>
+                <div class="w-full h-px bg-green-400 mb-4"></div>
+                <p class="text-sm text-gray-200">Descubre los mejores productos al mejor precio</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carrusel derecha -->
+          <div class="col-span-12 lg:col-span-9">
+            <div class="relative">
+              <!-- Contenedor del carrusel -->
+              <div id="recomendados-carousel" class="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
+                <div id="recomendados-track" class="grid grid-flow-col gap-4 auto-cols-[90%] sm:auto-cols-[70%] md:auto-cols-[48%] lg:auto-cols-[23%] pb-4">
+                  <!-- Los productos se cargan dinámicamente aquí -->
+                </div>
+              </div>
+
+              <!-- Flechas de navegación -->
+              <button id="prev-btn" aria-label="Productos anteriores" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:shadow-xl transition-all duration-200 z-10">
+                <span class="text-lg font-bold">‹</span>
+              </button>
+              <button id="next-btn" aria-label="Productos siguientes" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:shadow-xl transition-all duration-200 z-10">
+                <span class="text-lg font-bold">›</span>
+              </button>
+
+              <!-- Dots indicadores -->
+              <div id="recomendados-dots" class="flex justify-center mt-4 gap-2">
+                <!-- Los dots se generan dinámicamente -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style>
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      </style>
+
+      <script>
+        // Datos de productos recomendados
+        const recomendados = [
+          {
+            id: 1,
+            nombre: "Notebook Gamer HP OMEN 16 Slim 16-AMD 4th Intel Core Ultra 9 285H Pantalla WQXGA 16.0\" / 16GB De RAM / 1TB SSD / Win11Home / GeForce...",
+            categoria: "Notebook",
+            codigo: "54158",
+            img: "img/products/notebook.jpg",
+            usd: "1.715,00",
+            brl: "9.276,54",
+            pyg: "12.402.700",
+            url: "producto.html"
+          },
+          {
+            id: 2,
+            nombre: "Mini PC Macrovip NanoBOX K1 Intel Core i5 1215U De 1.2GHz / 8GB De RAM / 512GB SSD / Win11Pro - Negro",
+            categoria: "Mini PC",
+            codigo: "54093",
+            img: "img/products/smartphone.jpg",
+            usd: "225,00",
+            brl: "1.228,50",
+            pyg: "1.642.500",
+            url: "producto.html"
+          },
+          {
+            id: 3,
+            nombre: "Mini PC Beelink EQR6 AMD Ryzen 7 5800H De 3.2GHz / 32GB De RAM / 500GB SSD / Win11Pro - Milky Gris",
+            categoria: "Mini PC",
+            codigo: "54407",
+            img: "img/products/auriculares.jpg",
+            usd: "375,00",
+            brl: "2.047,50",
+            pyg: "2.737.500",
+            url: "producto.html"
+          },
+          {
+            id: 4,
+            nombre: "Mini PC Macrovip NanoBOX K1 Intel N100 / 8GB De RAM / 256GB SSD / Win11Pro - Negro",
+            categoria: "Mini PC",
+            codigo: "54095",
+            img: "img/products/perfume.jpg",
+            usd: "147,00",
+            brl: "802,62",
+            pyg: "1.073.100",
+            url: "producto.html"
+          },
+          {
+            id: 5,
+            nombre: "Samsung Galaxy S25 Ultra 256GB - Titanium Black",
+            categoria: "Smartphone",
+            codigo: "54201",
+            img: "img/products/samsung_s25.jpg",
+            usd: "1.299,00",
+            brl: "7.094,55",
+            pyg: "9.492.150",
+            url: "producto.html"
+          },
+          {
+            id: 6,
+            nombre: "ADATA SPECTRIX D60G RGB 16GB DDR4 3200MHz",
+            categoria: "Memoria RAM",
+            codigo: "54302",
+            img: "img/products/notebook.jpg",
+            usd: "89,00",
+            brl: "485,95",
+            pyg: "650.050",
+            url: "producto.html"
+          }
+        ];
+
+        let currentPage = 0;
+        let itemsPerPage = 4;
+
+        function getItemsPerPage() {
+          const width = window.innerWidth;
+          if (width >= 1024) return 4; // lg
+          if (width >= 768) return 3;  // md
+          if (width >= 640) return 2;  // sm
+          return 1; // xs
+        }
+
+        function renderRecomendados() {
+          const track = document.getElementById('recomendados-track');
+          track.innerHTML = '';
+
+          recomendados.forEach(producto => {
+            const card = document.createElement('div');
+            card.className = 'snap-start rounded-2xl border border-gray-200 bg-white shadow-sm p-4 hover:shadow-md transition-shadow duration-200 flex-shrink-0';
+            
+            card.innerHTML = `
+              <a href="${producto.url}" class="block">
+                <div class="mb-2">
+                  <span class="text-emerald-600 text-sm font-semibold">${producto.categoria}</span>
+                </div>
+                <div class="mb-3">
+                  <img src="${producto.img}" alt="${producto.nombre}" class="w-full h-40 object-contain bg-gray-50 rounded-md">
+                </div>
+                <div class="space-y-2">
+                  <h3 class="text-sm text-gray-800 line-clamp-2 leading-tight">${producto.nombre}</h3>
+                  <p class="text-xs text-gray-500">CÓDIGO: ${producto.codigo}</p>
+                  <div class="space-y-1">
+                    <p class="text-emerald-600 text-2xl font-extrabold">U$ ${producto.usd}</p>
+                    <p class="text-[11px] text-gray-500">R$ ${producto.brl}</p>
+                    <p class="text-[11px] text-gray-500">G$ ${producto.pyg}</p>
+                  </div>
+                </div>
+              </a>
+            `;
+            
+            track.appendChild(card);
+          });
+
+          updateDots();
+        }
+
+        function scrollToPage(pageIndex) {
+          const carousel = document.getElementById('recomendados-carousel');
+          const targetScroll = pageIndex * carousel.clientWidth;
+          
+          carousel.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+          });
+          
+          currentPage = pageIndex;
+          updateDots();
+        }
+
+        function updateDots() {
+          itemsPerPage = getItemsPerPage();
+          const totalPages = Math.ceil(recomendados.length / itemsPerPage);
+          const dotsContainer = document.getElementById('recomendados-dots');
+          
+          dotsContainer.innerHTML = '';
+
+          for (let i = 0; i < totalPages; i++) {
+            const dot = document.createElement('button');
+            dot.className = `w-2 h-2 rounded-full transition-colors duration-200 ${
+              i === currentPage ? 'bg-emerald-600' : 'bg-gray-300'
+            }`;
+            dot.setAttribute('aria-label', `Ir a página ${i + 1}`);
+            if (i === currentPage) {
+              dot.setAttribute('aria-current', 'true');
+            }
+            
+            dot.addEventListener('click', () => scrollToPage(i));
+            dotsContainer.appendChild(dot);
+          }
+        }
+
+        function updateCurrentPage() {
+          const carousel = document.getElementById('recomendados-carousel');
+          const scrollLeft = carousel.scrollLeft;
+          const pageWidth = carousel.clientWidth;
+          const newPage = Math.round(scrollLeft / pageWidth);
+          
+          if (newPage !== currentPage) {
+            currentPage = newPage;
+            updateDots();
+          }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+          renderRecomendados();
+          
+          const carousel = document.getElementById('recomendados-carousel');
+          const prevBtn = document.getElementById('prev-btn');
+          const nextBtn = document.getElementById('next-btn');
+
+          // Event listeners para las flechas
+          prevBtn.addEventListener('click', () => {
+            const newPage = Math.max(0, currentPage - 1);
+            scrollToPage(newPage);
+          });
+
+          nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(recomendados.length / getItemsPerPage());
+            const newPage = Math.min(totalPages - 1, currentPage + 1);
+            scrollToPage(newPage);
+          });
+
+          // Detectar scroll manual
+          carousel.addEventListener('scroll', updateCurrentPage);
+
+          // Actualizar en resize
+          window.addEventListener('resize', () => {
+            updateDots();
+          });
+        });
+      </script>
     </main>
   </div>
 
@@ -120,6 +414,39 @@
       © 2025 Compras Posadas — Hecho para comparar precios en Posadas, Misiones.
     </div>
   </footer>
+
+  <!-- Barra de navegación inferior (Bottom Navigation) -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <div class="bottom-nav__container">
+      <a href="index.html" class="bottom-nav__item" aria-label="Ir al inicio">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="bottom-nav__label">Home</span>
+      </a>
+      
+      <a href="listado_box.html" class="bottom-nav__item" aria-label="Ver tiendas">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M23 21V19C23 18.1974 22.7205 17.4204 22.2207 16.8056C21.7209 16.1908 21.0332 15.7759 20.26 15.64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 3.13C16.7739 3.26531 17.4622 3.68167 17.9629 4.29790C18.4636 4.91413 18.7436 5.69240 18.7436 6.49635C18.7436 7.30030 18.4636 8.07857 17.9629 8.69480C17.4622 9.31103 16.7739 9.72739 16 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="bottom-nav__label">Tiendas</span>
+      </a>
+      
+      <button class="bottom-nav__item bottom-nav__categories" aria-label="Abrir categorías" aria-expanded="false">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="bottom-nav__label">Categorías</span>
+      </button>
+    </div>
+  </nav>
+
   <script src="assets/js/script.js"></script>
 </body>
 </html>
