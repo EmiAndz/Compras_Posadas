@@ -29,8 +29,12 @@
         </button>
       </form>
       <nav class="actions">
-        <a href="#" class="action-btn">Iniciar sesión</a>
-        <a href="#" class="action-btn">Lista deseos</a>
+        <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
+          <span class="icon-heart" aria-hidden="true">♥</span>
+          Lista deseos
+          <span id="wlCount" class="badge">0</span>
+        </button>
+        <button type="button" class="action-btn" id="btnLogin">Iniciar sesión</button>
       </nav>
     </div>
   </header>
@@ -46,7 +50,7 @@
         <span>Home</span>
       </a>
       
-      <a href="listado_box.html" class="desktop-nav__item">
+      <a href="tiendas.html" class="desktop-nav__item">
         <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M21 20C21 18.9391 20.5786 17.9217 19.8284 17.1716C19.0783 16.4214 18.0609 16 17 16H9C7.93913 16 6.92172 16.4214 6.17157 17.1716C5.42143 17.9217 5 18.9391 5 20M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M19 21V19C19 18.1974 18.7205 17.4204 18.2207 16.8056C17.7209 16.1908 17.0332 15.7759 16.26 15.64M15 3.13C15.7739 3.26531 16.4622 3.68167 16.9629 4.29790C17.4636 4.91413 17.7436 5.69240 17.7436 6.49635C17.7436 7.30030 17.4636 8.07857 16.9629 8.69480C16.4622 9.31103 15.7739 9.72739 15 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -54,7 +58,7 @@
         <span>Tiendas</span>
       </a>
       
-      <a href="#" class="desktop-nav__item">
+      <a href="ubicaciones.html" class="desktop-nav__item">
         <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
@@ -97,58 +101,13 @@
       <!-- Carrusel/Slider de banners -->
       <section class="carousel" aria-label="Banners promocionales">
         <div class="carousel__viewport">
-          <div class="carousel__slide" data-index="0" style="background-image:url('img/banners/copalibertadores.jpg');">
-            <div class="carousel__content">
-              <h2>¡Ofertas en Smartphones!</h2>
-              <p>Descubre los mejores precios en tecnología móvil.</p>
-              <a href="listado_box.html" class="carousel__btn">Ver productos</a>
-            </div>
-          </div>
-          <div class="carousel__slide" data-index="1" style="background-image:url('img/products/samsung_s25.jpg');">
-            <div class="carousel__content">
-              <h2>Perfumes exclusivos</h2>
-              <p>Fragancias originales a precios únicos.</p>
-              <a href="listado_box.html" class="carousel__btn">Ver perfumes</a>
-            </div>
-          </div>
-          <div class="carousel__slide" data-index="2" style="background-image:url('img/products/notebook.jpg');">
-            <div class="carousel__content">
-              <h2>Notebooks y más</h2>
-              <p>Equipos para estudiar y trabajar al mejor precio.</p>
-              <a href="listado_box.html" class="carousel__btn">Ver notebooks</a>
-            </div>
-          </div>
+          <div class="carousel__slide" data-index="0" style="background-image:url('img/banners/copalibertadores.jpg');"></div>
+          <div class="carousel__slide" data-index="1" style="background-image:url('img/products/samsung_s25.jpg');"></div>
+          <div class="carousel__slide" data-index="2" style="background-image:url('img/products/notebook.jpg');"></div>
         </div>
         <button class="carousel__nav carousel__nav--prev" aria-label="Anterior">&#10094;</button>
         <button class="carousel__nav carousel__nav--next" aria-label="Siguiente">&#10095;</button>
         <div class="carousel__dots" role="tablist"></div>
-      </section>
-
-      <!-- Productos destacados -->
-      <section class="featured">
-        <h2>Destacados</h2>
-        <div class="cards">
-          <a class="card" href="producto.html">
-            <img src="img/products/perfume.jpg" alt="Perfume" />
-            <h3>Perfume</h3>
-            <p>$300</p>
-          </a>
-          <a class="card" href="producto.html">
-            <img src="img/products/smartphone.jpg" alt="Smartphone" />
-            <h3>Smartphone</h3>
-            <p>$450</p>
-          </a>
-          <a class="card" href="producto.html">
-            <img src="img/products/notebook.jpg" alt="Notebook" />
-            <h3>Notebook</h3>
-            <p>$1200</p>
-          </a>
-          <a class="card" href="producto.html">
-            <img src="img/products/auriculares.jpg" alt="Auriculares" />
-            <h3>Auriculares</h3>
-            <p>$80</p>
-          </a>
-        </div>
       </section>
 
       <!-- Productos recomendados -->
@@ -302,30 +261,41 @@
           recomendados.forEach(producto => {
             const card = document.createElement('div');
             card.className = 'snap-start rounded-2xl border border-gray-200 bg-white shadow-sm p-4 hover:shadow-md transition-shadow duration-200 flex-shrink-0';
+            card.setAttribute('data-card-id', producto.id);
             
             card.innerHTML = `
-              <a href="${producto.url}" class="block">
-                <div class="mb-2">
-                  <span class="text-emerald-600 text-sm font-semibold">${producto.categoria}</span>
-                </div>
-                <div class="mb-3">
-                  <img src="${producto.img}" alt="${producto.nombre}" class="w-full h-40 object-contain bg-gray-50 rounded-md">
-                </div>
-                <div class="space-y-2">
-                  <h3 class="text-sm text-gray-800 line-clamp-2 leading-tight">${producto.nombre}</h3>
-                  <p class="text-xs text-gray-500">CÓDIGO: ${producto.codigo}</p>
-                  <div class="space-y-1">
-                    <p class="text-emerald-600 text-2xl font-extrabold">U$ ${producto.usd}</p>
-                    <p class="text-[11px] text-gray-500">R$ ${producto.brl}</p>
-                    <p class="text-[11px] text-gray-500">G$ ${producto.pyg}</p>
+              <div class="relative">
+                <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                        data-product-id="${producto.id}" 
+                        aria-label="Agregar a favoritos" 
+                        aria-pressed="false">
+                  <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                </button>
+                <a href="${producto.url}" class="block">
+                  <div class="mb-2">
+                    <span class="text-emerald-600 text-sm font-semibold">${producto.categoria}</span>
                   </div>
-                </div>
-              </a>
+                  <div class="mb-3">
+                    <img src="${producto.img}" alt="${producto.nombre}" class="w-full h-40 object-contain bg-gray-50 rounded-md">
+                  </div>
+                  <div class="space-y-2">
+                    <h3 class="text-sm text-gray-800 line-clamp-2 leading-tight">${producto.nombre}</h3>
+                    <p class="text-xs text-gray-500">CÓDIGO: ${producto.codigo}</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-2xl font-extrabold">U$ ${producto.usd}</p>
+                      <p class="text-[11px] text-gray-500">R$ ${producto.brl}</p>
+                      <p class="text-[11px] text-gray-500">G$ ${producto.pyg}</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
             `;
             
             track.appendChild(card);
           });
 
+          // Inicializar estado de favoritos en las cards recién creadas
+          initializeFavoriteButtons();
           updateDots();
         }
 
@@ -404,7 +374,383 @@
             updateDots();
           });
         });
+
+        // === Sistema de Favoritos para Cards ===
+        // NOTA: El sistema de favoritos está implementado en assets/js/script.js
+        // Esta función solo se usa para compatibilidad con las cards renderizadas dinámicamente
+        function initializeFavoriteButtons() {
+          // Disparar evento para notificar que hay nuevas cards
+          document.dispatchEvent(new CustomEvent('cards:rendered'));
+        }
       </script>
+
+      <script>
+        // Carrusel de Más Buscados
+        let currentMasBuscadosPage = 0;
+        
+        function getMasBuscadosItemsPerPage() {
+          const width = window.innerWidth;
+          if (width >= 1024) return 4; // lg
+          if (width >= 640) return 2;  // sm
+          return 1; // xs
+        }
+
+        function scrollMasBuscadosToPage(pageIndex) {
+          const carousel = document.getElementById('mas-buscados-carousel');
+          const targetScroll = pageIndex * carousel.clientWidth;
+          
+          carousel.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+          });
+          
+          currentMasBuscadosPage = pageIndex;
+          updateMasBuscadosDots();
+        }
+
+        function updateMasBuscadosDots() {
+          const itemsPerPage = getMasBuscadosItemsPerPage();
+          const totalItems = 8; // Total de productos en más buscados
+          const totalPages = Math.ceil(totalItems / itemsPerPage);
+          const dotsContainer = document.getElementById('mas-buscados-dots');
+          
+          dotsContainer.innerHTML = '';
+
+          for (let i = 0; i < totalPages; i++) {
+            const dot = document.createElement('button');
+            dot.className = `w-2 h-2 rounded-full transition-colors duration-200 ${
+              i === currentMasBuscadosPage ? 'bg-emerald-600' : 'bg-gray-300'
+            }`;
+            dot.setAttribute('aria-label', `Ir a página ${i + 1} de más buscados`);
+            if (i === currentMasBuscadosPage) {
+              dot.setAttribute('aria-current', 'true');
+            }
+            
+            dot.addEventListener('click', () => scrollMasBuscadosToPage(i));
+            dotsContainer.appendChild(dot);
+          }
+        }
+
+        function updateMasBuscadosCurrentPage() {
+          const carousel = document.getElementById('mas-buscados-carousel');
+          const scrollLeft = carousel.scrollLeft;
+          const pageWidth = carousel.clientWidth;
+          const newPage = Math.round(scrollLeft / pageWidth);
+          
+          if (newPage !== currentMasBuscadosPage) {
+            currentMasBuscadosPage = newPage;
+            updateMasBuscadosDots();
+          }
+        }
+
+        // Inicialización del carrusel de Más Buscados
+        document.addEventListener('DOMContentLoaded', function() {
+          const masBuscadosCarousel = document.getElementById('mas-buscados-carousel');
+          const masBuscadosPrevBtn = document.getElementById('mas-buscados-prev-btn');
+          const masBuscadosNextBtn = document.getElementById('mas-buscados-next-btn');
+
+          // Event listeners para las flechas
+          masBuscadosPrevBtn.addEventListener('click', () => {
+            const newPage = Math.max(0, currentMasBuscadosPage - 1);
+            scrollMasBuscadosToPage(newPage);
+          });
+
+          masBuscadosNextBtn.addEventListener('click', () => {
+            const itemsPerPage = getMasBuscadosItemsPerPage();
+            const totalPages = Math.ceil(8 / itemsPerPage);
+            const newPage = Math.min(totalPages - 1, currentMasBuscadosPage + 1);
+            scrollMasBuscadosToPage(newPage);
+          });
+
+          // Detectar scroll manual
+          masBuscadosCarousel.addEventListener('scroll', updateMasBuscadosCurrentPage);
+
+          // Actualizar en resize
+          window.addEventListener('resize', () => {
+            updateMasBuscadosDots();
+          });
+
+          // Inicializar dots
+          updateMasBuscadosDots();
+          
+          // Inicializar botones de favoritos para productos más buscados
+          initializeFavoriteButtons();
+        });
+      </script>
+
+      <!-- Banners publicitarios -->
+      <section class="py-8 px-4 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Banner 1 - Echo/Alexa -->
+          <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-blue-400 to-cyan-400 p-6 min-h-[200px] flex items-center">
+            <div class="flex-1 text-white">
+              <div class="mb-2">
+                <span class="text-sm font-semibold">Casa inteligente</span>
+              </div>
+              <h3 class="text-2xl lg:text-3xl font-bold mb-3">Descubra sua<br>Alexa ideal</h3>
+              <button class="bg-black bg-opacity-70 hover:bg-opacity-80 text-white px-6 py-2 rounded-full font-semibold transition-all duration-200">
+                confira ›
+              </button>
+            </div>
+            <div class="flex-shrink-0 ml-4">
+              <img src="img/banners/echo-devices.jpg" alt="Dispositivos Echo" class="w-32 lg:w-40 h-auto object-contain" onerror="this.style.display='none'">
+            </div>
+          </div>
+
+          <!-- Banner 2 - D-Link -->
+          <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-teal-400 to-blue-400 p-6 min-h-[200px] flex items-center">
+            <div class="flex-1 text-white">
+              <div class="mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl font-bold">D-Link</span>
+                  <span class="text-sm">EAGLEPRO AI</span>
+                </div>
+              </div>
+              <h3 class="text-2xl lg:text-3xl font-bold mb-1">AI WiFi Optimizer.</h3>
+              <p class="text-lg mb-3">Sempre a melhor<br>conexão.</p>
+              <button class="bg-white bg-opacity-90 hover:bg-opacity-100 text-teal-800 px-6 py-2 rounded-full font-semibold transition-all duration-200">
+                confira ›
+              </button>
+            </div>
+            <div class="flex-shrink-0 ml-4">
+              <img src="img/banners/dlink-router.jpg" alt="Router D-Link" class="w-32 lg:w-40 h-auto object-contain" onerror="this.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Divisor Más buscados -->
+      <section class="py-8 px-4 max-w-7xl mx-auto">
+        <div class="relative">
+          <div class="flex items-center">
+            <h2 class="text-2xl lg:text-3xl font-bold text-emerald-600 uppercase tracking-wide pr-4">MÁS BUSCADOS</h2>
+            <div class="flex-1 h-1 bg-emerald-500"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grid de productos más buscados -->
+      <section class="py-8 px-4 max-w-7xl mx-auto">
+        <div class="relative">
+          <!-- Contenedor del carrusel -->
+          <div id="mas-buscados-carousel" class="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
+            <div id="mas-buscados-track" class="grid grid-flow-col gap-6 auto-cols-[90%] sm:auto-cols-[45%] lg:auto-cols-[23%] pb-4">
+              <!-- Producto 1 - Mouse -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-1">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-1" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Mouse</h3>
+                    <div class="mb-4">
+                      <img src="img/products/auriculares.jpg" alt="Mouse Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Mouse Gamer Redragon M711RGB Cobra USB / RGB - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 15420</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 19,00</p>
+                      <p class="text-xs text-gray-500">R$ 103,74</p>
+                      <p class="text-xs text-gray-500">G$ 138.700</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 2 - Teclados -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-2">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-2" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Teclados</h3>
+                    <div class="mb-4">
+                      <img src="img/products/notebook.jpg" alt="Teclado Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Teclado Gamer Satellite AK-837 USB / RGB / Portugués - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16441</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 9,00</p>
+                      <p class="text-xs text-gray-500">R$ 49,14</p>
+                      <p class="text-xs text-gray-500">G$ 65.700</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 3 - Teclados -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-3">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-3" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Teclados</h3>
+                    <div class="mb-4">
+                      <img src="img/products/perfume.jpg" alt="Teclado Mecánico" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Teclado Redragon Gamer/Gaming Yama Mechanical K550RGB-1 - Preto</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16730</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 54,60</p>
+                      <p class="text-xs text-gray-500">R$ 298,12</p>
+                      <p class="text-xs text-gray-500">G$ 398.580</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 4 - Controles y Accesorios -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-4">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-4" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Controles y Accesorios</h3>
+                    <div class="mb-4">
+                      <img src="img/products/samsung_s25.jpg" alt="Control Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Control Redragon G807 Saturn Vibration Para PS3 / PC / USB - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16743</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 15,90</p>
+                      <p class="text-xs text-gray-500">R$ 85,81</p>
+                      <p class="text-xs text-gray-500">G$ 116.070</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 5 - Auriculares -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-5">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-5" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Auriculares</h3>
+                    <div class="mb-4">
+                      <img src="img/products/smartphone.jpg" alt="Auriculares Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Auriculares Gamer Redragon Zeus H510 USB 7.1 - Negro/Rojo</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 17856</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 32,50</p>
+                      <p class="text-xs text-gray-500">R$ 177,38</p>
+                      <p class="text-xs text-gray-500">G$ 237.250</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 6 - Webcam -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-6">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-6" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Webcam</h3>
+                    <div class="mb-4">
+                      <img src="img/products/notebook.jpg" alt="Webcam HD" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Webcam Logitech C920 HD Pro 1080p USB - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 18294</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 89,90</p>
+                      <p class="text-xs text-gray-500">R$ 490,45</p>
+                      <p class="text-xs text-gray-500">G$ 656.310</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 7 - Monitor -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-7">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-7" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Monitor</h3>
+                    <div class="mb-4">
+                      <img src="img/products/perfume.jpg" alt="Monitor Gaming" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Monitor Gamer AOC 24G2 24" 144Hz IPS Full HD - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 19157</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 185,00</p>
+                      <p class="text-xs text-gray-500">R$ 1.009,25</p>
+                      <p class="text-xs text-gray-500">G$ 1.351.250</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Producto 8 - Parlantes -->
+              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-8">
+                <div class="relative">
+                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                          data-product-id="mb-8" 
+                          aria-label="Agregar a favoritos" 
+                          aria-pressed="false">
+                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                  </button>
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Parlantes</h3>
+                    <div class="mb-4">
+                      <img src="img/products/samsung_s25.jpg" alt="Parlantes Gaming" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Parlantes Gaming Redragon Orpheus GS560 RGB 2.1 - Negro</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 20485</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">U$ 45,90</p>
+                      <p class="text-xs text-gray-500">R$ 250,42</p>
+                      <p class="text-xs text-gray-500">G$ 335.070</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flechas de navegación -->
+          <button id="mas-buscados-prev-btn" aria-label="Productos anteriores" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:shadow-xl transition-all duration-200 z-10">
+            <span class="text-lg font-bold">‹</span>
+          </button>
+          <button id="mas-buscados-next-btn" aria-label="Productos siguientes" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:shadow-xl transition-all duration-200 z-10">
+            <span class="text-lg font-bold">›</span>
+          </button>
+
+          <!-- Dots indicadores -->
+          <div id="mas-buscados-dots" class="flex justify-center mt-4 gap-2">
+            <!-- Los dots se generan dinámicamente -->
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -426,7 +772,7 @@
         <span class="bottom-nav__label">Home</span>
       </a>
       
-      <a href="listado_box.html" class="bottom-nav__item" aria-label="Ver tiendas">
+      <a href="tiendas.html" class="bottom-nav__item" aria-label="Ver tiendas">
         <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
@@ -434,6 +780,14 @@
           <path d="M16 3.13C16.7739 3.26531 17.4622 3.68167 17.9629 4.29790C18.4636 4.91413 18.7436 5.69240 18.7436 6.49635C18.7436 7.30030 18.4636 8.07857 17.9629 8.69480C17.4622 9.31103 16.7739 9.72739 16 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span class="bottom-nav__label">Tiendas</span>
+      </a>
+      
+      <a href="ubicaciones.html" class="bottom-nav__item" aria-label="Ver ubicaciones">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span class="bottom-nav__label">Ubicaciones</span>
       </a>
       
       <button class="bottom-nav__item bottom-nav__categories" aria-label="Abrir categorías" aria-expanded="false">
@@ -446,6 +800,50 @@
       </button>
     </div>
   </nav>
+
+  <!-- Modal de Login -->
+  <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card">
+      <header class="modal__header">
+        <h2 id="loginTitle">Iniciar sesión</h2>
+        <button class="modal__close" type="button" aria-label="Cerrar" data-close>×</button>
+      </header>
+      <form id="loginForm" class="modal__body" novalidate>
+        <label>Email
+          <input type="email" name="email" placeholder="tu@email.com" required />
+        </label>
+        <label>Contraseña
+          <input type="password" name="password" placeholder="••••••••" minlength="6" required />
+        </label>
+        <button id="loginSubmit" class="btn btn-primary" type="submit">Ingresar</button>
+        <div class="modal__links">
+          <button type="button" class="link" id="forgotPass">¿Olvidaste tu contraseña?</button>
+          <button type="button" class="link" id="createAccount">Crear cuenta</button>
+        </div>
+        <div class="modal__oauth">
+          <button type="button" class="btn btn-ghost" id="loginGoogle">Continuar con Google</button>
+          <small class="hint">* Google se activará cuando conectemos Supabase</small>
+        </div>
+        <p id="loginError" class="form-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de deseos (Drawer) -->
+  <aside id="wishlistDrawer" class="wl-drawer" aria-hidden="true" aria-label="Lista de deseos">
+    <div class="wl-backdrop" data-close></div>
+    <section class="wl-panel">
+      <header class="wl-header">
+        <h3>Lista de deseos</h3>
+        <button class="wl-close" type="button" aria-label="Cerrar" data-close>×</button>
+      </header>
+      <div id="wlList" class="wl-list" role="list"></div>
+      <footer class="wl-footer">
+        <button id="wlClear" class="btn btn-ghost">Vaciar lista</button>
+      </footer>
+    </section>
+  </aside>
 
   <script src="assets/js/script.js"></script>
 </body>

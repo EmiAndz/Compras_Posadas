@@ -1,0 +1,178 @@
+[
+  {
+    "id": "p-001",
+    "storeId": "store-visaovip",
+    "name": "Notebook HP 15\" Core i5 8GB RAM 256GB SSD",
+    "image": "img/products/notebook.jpg",
+    "price": 1200,
+    "currency": "USD",
+    "category": "Notebooks",
+    "brand": "HP",
+    "code": "54158"
+  },
+  {
+    "id": "p-002", 
+    "storeId": "store-visaovip",
+    "name": "Mini PC Intel Core i5 8GB RAM 512GB SSD Win11Pro",
+    "image": "img/products/smartphone.jpg",
+    "price": 225,
+    "currency": "USD",
+    "category": "Mini PC",
+    "brand": "Intel",
+    "code": "54093"
+  },
+  {
+    "id": "p-003",
+    "storeId": "store-electromax",
+    "name": "Samsung Galaxy S25 Ultra 256GB Titanium Black",
+    "image": "img/products/samsung_s25.jpg",
+    "price": 1299,
+    "currency": "USD",
+    "category": "Smartphones",
+    "brand": "Samsung",
+    "code": "54201"
+  },
+  {
+    "id": "p-004",
+    "storeId": "store-electromax",
+    "name": "iPhone 15 Pro 128GB Natural Titanium",
+    "image": "img/products/smartphone.jpg",
+    "price": 1599,
+    "currency": "USD",
+    "category": "Smartphones",
+    "brand": "Apple",
+    "code": "54310"
+  },
+  {
+    "id": "p-005",
+    "storeId": "store-bellapiel",
+    "name": "Perfume Yves Saint Laurent Black Opium 90ml",
+    "image": "img/products/yves.png",
+    "price": 89,
+    "currency": "USD",
+    "category": "Perfumes",
+    "brand": "YSL",
+    "code": "54405"
+  },
+  {
+    "id": "p-006",
+    "storeId": "store-bellapiel",
+    "name": "Perfume Chanel No. 5 Eau de Parfum 100ml",
+    "image": "img/products/perfume.jpg",
+    "price": 156,
+    "currency": "USD",
+    "category": "Perfumes",
+    "brand": "Chanel",
+    "code": "54406"
+  },
+  {
+    "id": "p-007",
+    "storeId": "store-outdoorlife",
+    "name": "Carpa 4 Personas Resistente al Agua",
+    "image": "img/products/notebook.jpg",
+    "price": 180,
+    "currency": "USD",
+    "category": "Camping",
+    "brand": "Coleman",
+    "code": "54500"
+  },
+  {
+    "id": "p-008",
+    "storeId": "store-outdoorlife",
+    "name": "Mochila Trekking 60L con Sistema Hidratación",
+    "image": "img/products/auriculares.jpg",
+    "price": 95,
+    "currency": "USD",
+    "category": "Camping",
+    "brand": "Deuter",
+    "code": "54501"
+  },
+  {
+    "id": "p-009",
+    "storeId": "store-applemisiones",
+    "name": "MacBook Air M2 13\" 256GB Space Gray",
+    "image": "img/products/notebook.jpg",
+    "price": 1899,
+    "currency": "USD",
+    "category": "Laptops",
+    "brand": "Apple",
+    "code": "54600"
+  },
+  {
+    "id": "p-010",
+    "storeId": "store-applemisiones",
+    "name": "iPad Pro 11\" M4 128GB Wi-Fi Silver",
+    "image": "img/products/smartphone.jpg",
+    "price": 999,
+    "currency": "USD",
+    "category": "Tablets",
+    "brand": "Apple",
+    "code": "54601"
+  },
+  {
+    "id": "p-011",
+    "storeId": "store-gamezone",
+    "name": "Auriculares Gaming Redragon Zeus H510 RGB",
+    "image": "img/products/auriculares.jpg",
+    "price": 32,
+    "currency": "USD",
+    "category": "Gaming",
+    "brand": "Redragon",
+    "code": "54700"
+  },
+  {
+    "id": "p-012",
+    "storeId": "store-gamezone",
+    "name": "Teclado Mecánico Gaming RGB Redragon Yama",
+    "image": "img/products/perfume.jpg",
+    "price": 54,
+    "currency": "USD",
+    "category": "Gaming",
+    "brand": "Redragon",
+    "code": "54701"
+  },
+  {
+    "id": "p-013",
+    "storeId": "store-techplus",
+    "name": "Monitor Gaming AOC 24\" 144Hz IPS Full HD",
+    "image": "img/products/samsung_s25.jpg",
+    "price": 185,
+    "currency": "USD",
+    "category": "Monitores",
+    "brand": "AOC",
+    "code": "54800"
+  },
+  {
+    "id": "p-014",
+    "storeId": "store-techplus",
+    "name": "Memoria RAM DDR4 16GB 3200MHz RGB",
+    "image": "img/products/notebook.jpg",
+    "price": 89,
+    "currency": "USD",
+    "category": "Componentes",
+    "brand": "ADATA",
+    "code": "54801"
+  },
+  {
+    "id": "p-015",
+    "storeId": "store-fraganciavip",
+    "name": "Perfume Dior Sauvage Eau de Toilette 100ml",
+    "image": "img/products/perfume.jpg",
+    "price": 128,
+    "currency": "USD",
+    "category": "Perfumes",
+    "brand": "Dior",
+    "code": "54900"
+  },
+  {
+    "id": "p-016",
+    "storeId": "store-megaofertas",
+    "name": "Parlantes Bluetooth Portátil JBL Go 3",
+    "image": "img/products/auriculares.jpg",
+    "price": 45,
+    "currency": "USD",
+    "category": "Audio",
+    "brand": "JBL",
+    "code": "55000"
+  }
+]

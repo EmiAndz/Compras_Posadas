@@ -359,7 +359,9 @@ document.addEventListener('DOMContentLoaded', function () {
   function updateActiveState() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const bottomNavItems = document.querySelectorAll('.bottom-nav__item');
+    const desktopNavItems = document.querySelectorAll('.desktop-nav__item');
     
+    // Actualizar bottom navigation
     bottomNavItems.forEach(item => {
       item.classList.remove('active');
       
@@ -367,8 +369,32 @@ document.addEventListener('DOMContentLoaded', function () {
       if (currentPage === 'index.html' && item.getAttribute('href') === 'index.html') {
         item.classList.add('active');
       }
-      // Activar Tiendas para listado_box.html
-      else if (currentPage === 'listado_box.html' && item.getAttribute('href') === 'listado_box.html') {
+      // Activar Tiendas para tiendas.html y vendor.html
+      else if ((currentPage === 'tiendas.html' || currentPage === 'vendor.html') && 
+               item.getAttribute('href') === 'tiendas.html') {
+        item.classList.add('active');
+      }
+      // Activar Ubicaciones para ubicaciones.html
+      else if (currentPage === 'ubicaciones.html' && item.getAttribute('href') === 'ubicaciones.html') {
+        item.classList.add('active');
+      }
+    });
+
+    // Actualizar desktop navigation
+    desktopNavItems.forEach(item => {
+      item.classList.remove('active');
+      
+      // Activar Home para index.html
+      if (currentPage === 'index.html' && item.getAttribute('href') === 'index.html') {
+        item.classList.add('active');
+      }
+      // Activar Tiendas para tiendas.html y vendor.html
+      else if ((currentPage === 'tiendas.html' || currentPage === 'vendor.html') && 
+               item.getAttribute('href') === 'tiendas.html') {
+        item.classList.add('active');
+      }
+      // Activar Ubicaciones para ubicaciones.html
+      else if (currentPage === 'ubicaciones.html' && item.getAttribute('href') === 'ubicaciones.html') {
         item.classList.add('active');
       }
     });
@@ -661,6 +687,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // === Desktop Navigation Auto-Hide on Scroll ===
+// COMENTADO: Auto-hide desactivado para mantener navbar fija
+/*
 document.addEventListener('DOMContentLoaded', function() {
   const desktopNav = document.querySelector('.desktop-nav');
   if (!desktopNav) return;
@@ -718,4 +746,508 @@ document.addEventListener('DOMContentLoaded', function() {
       isScrollingDown = false;
     }
   });
+});
+*/
+
+// === Sistema de Autenticación ===
+document.addEventListener('DOMContentLoaded', function() {
+  // Configuración de storage
+  const STORAGE_KEY = 'cp:user';
+  
+  const getUser = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  };
+  
+  const setUser = (u) => localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+  const clearUser = () => localStorage.removeItem(STORAGE_KEY);
+
+  // Referencias al DOM
+  const modal = document.getElementById('loginModal');
+  const btnLogin = document.getElementById('btnLogin');
+  const form = document.getElementById('loginForm');
+  const submitBtn = document.getElementById('loginSubmit');
+  const errorEl = document.getElementById('loginError');
+
+  // Funciones para modal
+  function openLogin() {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      const emailInput = modal.querySelector('input[name="email"]');
+      if (emailInput) {
+        setTimeout(() => emailInput.focus(), 100);
+      }
+    }
+  }
+
+  function closeLogin() {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Event listeners del modal
+  if (btnLogin) {
+    btnLogin.addEventListener('click', openLogin);
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close], .modal__backdrop')) {
+        closeLogin();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.getAttribute('aria-hidden') === 'false') {
+      closeLogin();
+    }
+  });
+
+  // Validación y login fake
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+      
+      const fd = new FormData(form);
+      const email = (fd.get('email') || '').toString().trim();
+      const pass = (fd.get('password') || '').toString();
+      
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      
+      if (!validEmail) {
+        if (errorEl) {
+          errorEl.textContent = 'Ingresá un email válido.';
+          errorEl.hidden = false;
+        }
+        return;
+      }
+      
+      if (pass.length < 6) {
+        if (errorEl) {
+          errorEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+          errorEl.hidden = false;
+        }
+        return;
+      }
+      
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Ingresando…';
+      }
+      
+      setTimeout(() => {
+        setUser({
+          name: email.split('@')[0],
+          email: email
+        });
+        
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ingresar';
+        }
+        
+        // Limpiar formulario
+        form.reset();
+        
+        closeLogin();
+        paintAuthState();
+      }, 900);
+    });
+  }
+
+  // Función para pintar el estado de autenticación
+  function paintAuthState() {
+    const user = getUser();
+    const actions = document.querySelector('.actions');
+    
+    if (!actions) return;
+
+    // Remover menú existente si existe
+    const existing = actions.querySelector('.account-menu');
+    if (existing) {
+      existing.remove();
+    }
+
+    if (user) {
+      // Usuario logueado: ocultar botón login y mostrar menú de cuenta
+      const loginBtn = actions.querySelector('#btnLogin');
+      if (loginBtn) {
+        loginBtn.classList.add('hidden');
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'account-menu';
+      wrap.innerHTML = `
+        <button class="action-btn" id="btnAccount" aria-haspopup="true" aria-expanded="false">
+          ${user.name || 'Mi cuenta'}
+        </button>
+        <div class="account-dropdown" role="menu">
+          <a href="#" role="menuitem">Perfil (pronto)</a>
+          <button type="button" id="btnLogout" role="menuitem">Cerrar sesión</button>
+        </div>`;
+      
+      actions.appendChild(wrap);
+
+      const btnAcc = wrap.querySelector('#btnAccount');
+      const dropdown = wrap.querySelector('.account-dropdown');
+      
+      if (btnAcc && dropdown) {
+        btnAcc.addEventListener('click', () => {
+          const open = wrap.classList.toggle('open');
+          btnAcc.setAttribute('aria-expanded', String(open));
+        });
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', (e) => {
+          if (!wrap.contains(e.target)) {
+            wrap.classList.remove('open');
+            btnAcc.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        // Logout
+        const logoutBtn = wrap.querySelector('#btnLogout');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => {
+            clearUser();
+            paintAuthState();
+          });
+        }
+      }
+    } else {
+      // Usuario no logueado: mostrar botón login
+      const loginBtn = actions.querySelector('#btnLogin');
+      if (loginBtn) {
+        loginBtn.classList.remove('hidden');
+      }
+    }
+  }
+
+  // HOOKS para Supabase (preparados para integración futura)
+  const googleBtn = document.getElementById('loginGoogle');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => {
+      alert('Google se activará cuando conectemos Supabase.');
+      // TODO: Reemplazar por supabase.auth.signInWithOAuth({ provider: 'google' })
+    });
+  }
+
+  const forgotBtn = document.getElementById('forgotPass');
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', () => {
+      alert('Función disponible cuando integremos el servicio de autenticación.');
+      // TODO: Implementar reset de contraseña con Supabase
+    });
+  }
+
+  const createBtn = document.getElementById('createAccount');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => {
+      alert('Función disponible cuando integremos el servicio de autenticación.');
+      // TODO: Implementar registro con Supabase
+    });
+  }
+
+  // Inicializar estado de autenticación al cargar la página
+  paintAuthState();
+});
+
+// === Sistema de Lista de Deseos (Wishlist) ===
+document.addEventListener('DOMContentLoaded', function() {
+  // Storage key para favoritos (reutilizando la existente)
+  const FAVS_KEY = 'cp:favs';
+  
+  // Helper functions
+  const loadFavs = () => {
+    try {
+      return JSON.parse(localStorage.getItem(FAVS_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  };
+  
+  const saveFavs = (arr) => localStorage.setItem(FAVS_KEY, JSON.stringify(arr));
+  
+  // Referencias al DOM
+  const drawer = document.getElementById('wishlistDrawer');
+  const btnWl = document.getElementById('btnWishlist');
+  const wlList = document.getElementById('wlList');
+  const wlClear = document.getElementById('wlClear');
+  const wlCount = document.getElementById('wlCount');
+
+  // Función para actualizar contador en header
+  function paintWishlistCount() {
+    if (!wlCount) return;
+    const count = loadFavs().length;
+    wlCount.textContent = String(count);
+  }
+
+  // Función para obtener datos de producto por ID
+  function getProductDataById(id) {
+    // Intentar resolver desde una card visible en el DOM
+    const selectors = [
+      `.card[data-card-id="${id}"]`,
+      `[data-product-id="${id}"]`,
+      `.product-card[data-id="${id}"]`
+    ];
+    
+    let card = null;
+    for (const selector of selectors) {
+      card = document.querySelector(selector);
+      if (card) break;
+    }
+    
+    if (card) {
+      // Extraer datos de la card
+      const nameSelectors = ['.card__title', '.product-title', 'h3', 'h4', '.title'];
+      const priceSelectors = ['.card__price', '.product-price', '.price', '.text-emerald-600'];
+      const imgSelectors = ['.card__img img', 'img', '.product-image'];
+      
+      let name = 'Producto';
+      for (const sel of nameSelectors) {
+        const el = card.querySelector(sel);
+        if (el?.textContent?.trim()) {
+          name = el.textContent.trim();
+          break;
+        }
+      }
+      
+      let price = '';
+      for (const sel of priceSelectors) {
+        const el = card.querySelector(sel);
+        if (el?.textContent?.trim()) {
+          price = el.textContent.trim();
+          break;
+        }
+      }
+      
+      let img = '';
+      for (const sel of imgSelectors) {
+        const el = card.querySelector(sel);
+        if (el?.src) {
+          img = el.src;
+          break;
+        }
+      }
+      
+      return { id, name, price, img };
+    }
+    
+    // Fallback: datos genéricos
+    return { 
+      id, 
+      name: `Producto #${id}`, 
+      price: '', 
+      img: '' 
+    };
+  }
+
+  // Función para renderizar la lista de deseos
+  function renderWishlist() {
+    if (!wlList) return;
+    
+    const favs = loadFavs();
+    wlList.innerHTML = '';
+    
+    if (!favs.length) {
+      wlList.innerHTML = `
+        <div style="opacity:.7;padding:20px;text-align:center;">
+          <p>Tu lista está vacía.</p>
+          <small>Agrega productos tocando el ♥ en las cards.</small>
+        </div>`;
+      return;
+    }
+    
+    favs.forEach(id => {
+      const product = getProductDataById(id);
+      const item = document.createElement('div');
+      item.className = 'wl-item';
+      
+      item.innerHTML = `
+        <img alt="${product.name}" src="${product.img || ''}" onerror="this.style.display='none'">
+        <div>
+          <h4>${product.name}</h4>
+          ${product.price ? `<small style="color:#1b7a46;font-weight:700">${product.price}</small>` : ''}
+        </div>
+        <div class="wl-actions">
+          <a class="btn btn-ghost" href="producto.html?id=${encodeURIComponent(id)}">Ver</a>
+          <button class="btn btn-primary" data-remove="${id}">Quitar</button>
+        </div>`;
+      
+      wlList.appendChild(item);
+    });
+
+    // Event listeners para botones "Quitar"
+    wlList.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-remove');
+        let favs = loadFavs().filter(x => String(x) !== String(id));
+        saveFavs(favs);
+        
+        // Actualizar UI del botón fav si existe
+        const favBtn = document.querySelector(`[data-card-id="${id}"] .fav-btn, [data-product-id="${id}"] .fav-btn`);
+        if (favBtn) {
+          favBtn.classList.remove('active');
+          favBtn.setAttribute('aria-pressed', 'false');
+        }
+        
+        // Disparar evento de actualización
+        document.dispatchEvent(new CustomEvent('cp:favs:updated'));
+        renderWishlist();
+      });
+    });
+  }
+
+  // Función para abrir drawer
+  const openWishlist = () => {
+    if (drawer) {
+      drawer.setAttribute('aria-hidden', 'false');
+      btnWl?.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      renderWishlist();
+    }
+  };
+
+  // Función para cerrar drawer
+  const closeWishlist = () => {
+    if (drawer) {
+      drawer.setAttribute('aria-hidden', 'true');
+      btnWl?.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Event listeners para abrir/cerrar
+  if (btnWl) {
+    btnWl.addEventListener('click', openWishlist);
+  }
+
+  if (drawer) {
+    drawer.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close], .wl-backdrop')) {
+        closeWishlist();
+      }
+    });
+  }
+
+  // Cerrar con ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer?.getAttribute('aria-hidden') === 'false') {
+      closeWishlist();
+    }
+  });
+
+  // Event listener para vaciar lista
+  if (wlClear) {
+    wlClear.addEventListener('click', () => {
+      if (confirm('¿Estás seguro de que quieres vaciar tu lista de deseos?')) {
+        saveFavs([]);
+        
+        // Actualizar todos los botones fav
+        document.querySelectorAll('.fav-btn.active').forEach(btn => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+        
+        // Disparar evento de actualización
+        document.dispatchEvent(new CustomEvent('cp:favs:updated'));
+        renderWishlist();
+      }
+    });
+  }
+
+  // Sincronización con cambios de favoritos
+  document.addEventListener('cp:favs:updated', () => {
+    paintWishlistCount();
+    updateFavoriteButtonsState();
+  });
+  
+  // Sincronización con storage de otras pestañas
+  window.addEventListener('storage', (e) => {
+    if (e.key === FAVS_KEY) {
+      paintWishlistCount();
+      updateFavoriteButtonsState();
+      // Actualizar drawer si está abierto
+      if (drawer?.getAttribute('aria-hidden') === 'false') {
+        renderWishlist();
+      }
+    }
+  });
+
+  // Inicializar contador al cargar
+  paintWishlistCount();
+
+  // === Sistema de Botones de Favoritos ===
+  // Función para actualizar estado visual de todos los botones de favoritos
+  function updateFavoriteButtonsState() {
+    const favs = loadFavs();
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      const productId = btn.getAttribute('data-product-id');
+      const isFavorite = favs.includes(String(productId));
+      
+      btn.classList.toggle('active', isFavorite);
+      btn.setAttribute('aria-pressed', String(isFavorite));
+      
+      const icon = btn.querySelector('.fav-icon');
+      if (icon) {
+        icon.style.color = isFavorite ? '#ef4444' : '';
+      }
+    });
+  }
+
+  // Event listener global para botones de favoritos
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.fav-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const btn = e.target.closest('.fav-btn');
+      const productId = btn.getAttribute('data-product-id');
+      
+      if (!productId) return;
+      
+      let favs = loadFavs();
+      const isFavorite = favs.includes(String(productId));
+      
+      if (isFavorite) {
+        // Remover de favoritos
+        favs = favs.filter(id => String(id) !== String(productId));
+      } else {
+        // Agregar a favoritos
+        favs.push(String(productId));
+      }
+      
+      saveFavs(favs);
+      updateFavoriteButtonsState();
+      
+      // Disparar evento para actualizar el contador de wishlist
+      document.dispatchEvent(new CustomEvent('cp:favs:updated'));
+    }
+  });
+
+  // Escuchar cuando se renderizan nuevas cards
+  document.addEventListener('cards:rendered', () => {
+    setTimeout(updateFavoriteButtonsState, 100);
+  });
+
+  // Sincronización con cambios de favoritos
+  document.addEventListener('cp:favs:updated', () => {
+    paintWishlistCount();
+    updateFavoriteButtonsState();
+  });
+  
+  // Inicializar estado de botones al cargar
+  setTimeout(updateFavoriteButtonsState, 200);
 });

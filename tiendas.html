@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiendas - Compras Posadas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar__wrap">
+      <a class="brand" href="index.html">
+        <span class="logo-icon"></span>
+        <span class="brand__name"><strong>Compras</strong> Posadas</span>
+      </a>
+      <form class="search" role="search" aria-label="Buscar productos">
+        <input 
+          type="search" 
+          placeholder="Buscar por producto, categoría, tienda" 
+          aria-label="Buscar producto" 
+        />
+        <button type="submit" class="btn-icon" aria-label="Buscar">
+          <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+            <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </form>
+      <nav class="actions">
+        <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
+          <span class="icon-heart" aria-hidden="true">♥</span>
+          Lista deseos
+          <span id="wlCount" class="badge">0</span>
+        </button>
+        <button type="button" class="action-btn" id="btnLogin">Iniciar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Barra de navegación superior (Desktop) -->
+  <nav class="desktop-nav" aria-label="Navegación principal desktop">
+    <div class="desktop-nav__wrap">
+      <a href="index.html" class="desktop-nav__item">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      
+      <a href="tiendas.html" class="desktop-nav__item active">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 20C21 18.9391 20.5786 17.9217 19.8284 17.1716C19.0783 16.4214 18.0609 16 17 16H9C7.93913 16 6.92172 16.4214 6.17157 17.1716C5.42143 17.9217 5 18.9391 5 20M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 21V19C19 18.1974 18.7205 17.4204 18.2207 16.8056C17.7209 16.1908 17.0332 15.7759 16.26 15.64M15 3.13C15.7739 3.26531 16.4622 3.68167 16.9629 4.29790C17.4636 4.91413 17.7436 5.69240 17.7436 6.49635C17.7436 7.30030 17.4636 8.07857 17.9629 8.69480C16.4622 9.31103 15.7739 9.72739 15 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Tiendas</span>
+      </a>
+      
+      <a href="#" class="desktop-nav__item">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Ubicaciones</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Botón de menú móvil -->
+  <button class="mobile-menu-btn" aria-label="Abrir menú de categorías" aria-expanded="false">
+    <span class="mobile-menu-btn__icon">☰</span>
+    <span class="mobile-menu-btn__text">Categorías</span>
+  </button>
+
+  <div class="container layout">
+    <!-- Sidebar de categorías -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <h2 class="sidebar__title">Categorías</h2>
+        <button class="sidebar__close" aria-label="Cerrar menú">✕</button>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="#"><span>📱</span> Celulares</a>
+        <a href="#"><span>🖥️</span> Electrónica</a>
+        <a href="#"><span>💄</span> Cosmetica</a>
+        <a href="#"><span>💻</span> Informática</a>
+        <a href="#"><span>🏕️</span> Camping</a>
+        <a href="#"><span>🍏</span> Apple</a>
+        <a href="#"><span>👕</span> Indumentaria</a>
+        <a href="#"><span>👟</span> Calzado</a>
+        <a href="#"><span>🏷️</span> Ofertas y descuentos</a>
+        <a href="#"><span>🗂️</span> Todas las categorías</a>
+      </nav>
+    </aside>
+
+    <!-- Área principal -->
+    <main class="main">
+      <!-- Hero Section -->
+      <section class="stores-hero">
+        <div class="stores-hero__content">
+          <h1 class="stores-hero__title">Tiendas en Posadas</h1>
+          <p class="stores-hero__subtitle">Descubre las mejores tiendas de la ciudad con productos verificados y garantía</p>
+        </div>
+      </section>
+
+      <!-- Barra de herramientas -->
+      <section class="stores-toolbar">
+        <div class="stores-toolbar__wrap">
+          <!-- Buscador -->
+          <div class="stores-search">
+            <input 
+              type="search" 
+              id="storeSearch"
+              placeholder="Buscar tienda por nombre, alias o barrio..."
+              aria-label="Buscar tiendas"
+              class="stores-search__input"
+            />
+            <button type="button" class="stores-search__clear" id="clearSearch" aria-label="Limpiar búsqueda" style="display: none;">×</button>
+          </div>
+
+          <!-- Filtros -->
+          <div class="stores-filters">
+            <select id="categoryFilter" class="stores-filter__select" aria-label="Filtrar por categoría">
+              <option value="">Todas las categorías</option>
+            </select>
+
+            <select id="sortFilter" class="stores-filter__select" aria-label="Ordenar tiendas">
+              <option value="alphabetical">Alfabético (A–Z)</option>
+              <option value="rating">Mejor valoradas</option>
+              <option value="newest">Más recientes</option>
+              <option value="price">Mejor precio</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contenedor de resultados -->
+      <section class="stores-results">
+        <div class="stores-results__header">
+          <p id="resultsCount" class="stores-results__count">Cargando tiendas...</p>
+        </div>
+
+        <!-- Loading skeleton -->
+        <div id="storesLoading" class="stores-grid">
+          <div class="store-card store-card--skeleton">
+            <div class="store-card__skeleton"></div>
+          </div>
+          <div class="store-card store-card--skeleton">
+            <div class="store-card__skeleton"></div>
+          </div>
+          <div class="store-card store-card--skeleton">
+            <div class="store-card__skeleton"></div>
+          </div>
+        </div>
+
+        <!-- Grid de tiendas -->
+        <div id="storesGrid" class="stores-grid" style="display: none;">
+          <!-- Las cards se renderizan dinámicamente aquí -->
+        </div>
+
+        <!-- Paginación -->
+        <div id="storesPagination" class="stores-pagination" style="display: none;">
+          <button id="prevPage" class="stores-pagination__btn" disabled>‹ Anterior</button>
+          <span id="pageInfo" class="stores-pagination__info">Página 1 de 1</span>
+          <button id="nextPage" class="stores-pagination__btn" disabled>Siguiente ›</button>
+        </div>
+
+        <!-- Estado vacío -->
+        <div id="emptyState" class="stores-empty" style="display: none;">
+          <div class="stores-empty__content">
+            <h3>No se encontraron tiendas</h3>
+            <p>Intenta ajustar los filtros de búsqueda o explora todas nuestras categorías</p>
+            <button id="resetFilters" class="btn btn-primary">Ver todas las tiendas</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__wrap">
+      © 2025 Compras Posadas — Hecho para comparar precios en Posadas, Misiones.
+    </div>
+  </footer>
+
+  <!-- Barra de navegación inferior (Bottom Navigation) -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <div class="bottom-nav__container">
+      <a href="index.html" class="bottom-nav__item" aria-label="Ir al inicio">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="bottom-nav__label">Home</span>
+      </a>
+      
+      <a href="tiendas.html" class="bottom-nav__item active" aria-label="Ver tiendas">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M23 21V19C23 18.1974 22.7205 17.4204 22.2207 16.8056C21.7209 16.1908 21.0332 15.7759 20.26 15.64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 3.13C16.7739 3.26531 17.4622 3.68167 17.9629 4.29790C17.4636 4.91413 17.7436 5.69240 17.7436 6.49635C17.7436 7.30030 17.4636 8.07857 17.9629 8.69480C17.4622 9.31103 16.7739 9.72739 16 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="bottom-nav__label">Tiendas</span>
+      </a>
+      
+      <button class="bottom-nav__item bottom-nav__categories" aria-label="Abrir categorías" aria-expanded="false">
+        <svg class="bottom-nav__icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="bottom-nav__label">Categorías</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Modal de Login -->
+  <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card">
+      <header class="modal__header">
+        <h2 id="loginTitle">Iniciar sesión</h2>
+        <button class="modal__close" type="button" aria-label="Cerrar" data-close>×</button>
+      </header>
+      <form id="loginForm" class="modal__body" novalidate>
+        <label>Email
+          <input type="email" name="email" placeholder="tu@email.com" required />
+        </label>
+        <label>Contraseña
+          <input type="password" name="password" placeholder="••••••••" minlength="6" required />
+        </label>
+        <button id="loginSubmit" class="btn btn-primary" type="submit">Ingresar</button>
+        <div class="modal__links">
+          <button type="button" class="link" id="forgotPass">¿Olvidaste tu contraseña?</button>
+          <button type="button" class="link" id="createAccount">Crear cuenta</button>
+        </div>
+        <div class="modal__oauth">
+          <button type="button" class="btn btn-ghost" id="loginGoogle">Continuar con Google</button>
+          <small class="hint">* Google se activará cuando conectemos Supabase</small>
+        </div>
+        <p id="loginError" class="form-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de deseos (Drawer) -->
+  <aside id="wishlistDrawer" class="wl-drawer" aria-hidden="true" aria-label="Lista de deseos">
+    <div class="wl-backdrop" data-close></div>
+    <section class="wl-panel">
+      <header class="wl-header">
+        <h3>Lista de deseos</h3>
+        <button class="wl-close" type="button" aria-label="Cerrar" data-close>×</button>
+      </header>
+      <div id="wlList" class="wl-list" role="list"></div>
+      <footer class="wl-footer">
+        <button id="wlClear" class="btn btn-ghost">Vaciar lista</button>
+      </footer>
+    </section>
+  </aside>
+
+  <script src="assets/js/script.js"></script>
+  <script src="assets/js/tiendas.js"></script>
+</body>
+</html>
