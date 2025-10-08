@@ -1,4 +1,4 @@
-# Sistema de Tiendas - Compras Posadas
+# Compras Posadas
 
 ## Archivos implementados
 
