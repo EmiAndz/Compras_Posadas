@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrar Tiendas - Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">📋 Migrar Tiendas a Supabase</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔄 Estado de la Migración</h2>
+            <div id="migration-status" class="space-y-2">
+                <p class="text-gray-600">Inicializando...</p>
+            </div>
+            
+            <div class="mt-4">
+                <button onclick="iniciarMigracion()" 
+                        id="migrate-btn"
+                        class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400">
+                    🚀 Iniciar Migración
+                </button>
+                
+                <button onclick="verificarTiendas()" 
+                        class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 ml-2">
+                    ✅ Verificar Tiendas
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">📊 Tiendas Encontradas</h2>
+            <div id="stores-list" class="space-y-3">
+                <p class="text-gray-600">Haz clic en "Verificar Tiendas" para ver las tiendas disponibles</p>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="panel-multi-tienda.html" 
+               class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 inline-block">
+                📱 Ir al Panel Multi-Tienda
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/simpleServices.js"></script>
+    
+    <script>
+        // Tiendas locales de ejemplo para migrar
+        const tiendasLocales = [
+            {
+                nombre: "TechStore Posadas",
+                email: "ventas@techstore.com",
+                telefono: "+54 376 4123456",
+                direccion: "Av. Mitre 1234, Posadas",
+                activa: true
+            },
+            {
+                nombre: "ElectroMax",
+                email: "info@electromax.com.ar",
+                telefono: "+54 376 4234567",
+                direccion: "Calle Bolívar 567, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Bella Piel Cosmética",
+                email: "contacto@bellapiel.com",
+                telefono: "+54 376 4345678",
+                direccion: "Av. Costanera 890, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Outdoor Life",
+                email: "ventas@outdoorlife.com",
+                telefono: "+54 376 4456789",
+                direccion: "Villa Cabello, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Perfumería Glamour",
+                email: "info@glamour.com",
+                telefono: "+54 376 4567890",
+                direccion: "Centro, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Deportes Extremos",
+                email: "ventas@deportesextremos.com",
+                telefono: "+54 376 4678901",
+                direccion: "Av. Uruguay, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Fashion Store",
+                email: "contacto@fashionstore.com",
+                telefono: "+54 376 4789012",
+                direccion: "Microcentro, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Hogar & Deco",
+                email: "ventas@hogardeco.com",
+                telefono: "+54 376 4890123",
+                direccion: "Barrio Itaembé Miní, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Librería Saber",
+                email: "info@libreriasaber.com",
+                telefono: "+54 376 4901234",
+                direccion: "Centro, Posadas",
+                activa: true
+            },
+            {
+                nombre: "Juguetería Feliz",
+                email: "ventas@jugueteriafeliz.com",
+                telefono: "+54 376 4012345",
+                direccion: "Villa Sarita, Posadas",
+                activa: true
+            }
+        ];
+
+        // Función para mostrar estado
+        function addStatus(message, isError = false) {
+            const statusDiv = document.getElementById('migration-status');
+            const p = document.createElement('p');
+            p.className = isError ? 'text-red-600' : 'text-green-600';
+            p.textContent = message;
+            statusDiv.appendChild(p);
+        }
+
+        // Verificar tiendas existentes
+        async function verificarTiendas() {
+            try {
+                addStatus('🔍 Verificando tiendas en Supabase...');
+                
+                const result = await window.SimpleSupabaseService.getAllStores();
+                
+                if (result.success) {
+                    const tiendas = result.data;
+                    addStatus(`✅ Encontradas ${tiendas.length} tiendas en Supabase`);
+                    
+                    mostrarListaTiendas(tiendas);
+                    
+                    // Verificar cuáles faltan
+                    const nombresExistentes = tiendas.map(t => t.nombre.toLowerCase());
+                    const tiendasFaltantes = tiendasLocales.filter(tl => 
+                        !nombresExistentes.includes(tl.nombre.toLowerCase())
+                    );
+                    
+                    if (tiendasFaltantes.length > 0) {
+                        addStatus(`⚠️ Faltan ${tiendasFaltantes.length} tiendas por migrar`);
+                        tiendasFaltantes.forEach(t => {
+                            addStatus(`   - ${t.nombre}`, false);
+                        });
+                    } else {
+                        addStatus('🎉 ¡Todas las tiendas están migradas!');
+                    }
+                    
+                } else {
+                    throw new Error('No se pudieron obtener las tiendas');
+                }
+                
+            } catch (error) {
+                addStatus(`❌ Error verificando tiendas: ${error.message}`, true);
+            }
+        }
+
+        // Mostrar lista de tiendas
+        function mostrarListaTiendas(tiendas) {
+            const listDiv = document.getElementById('stores-list');
+            listDiv.innerHTML = '';
+            
+            if (tiendas.length === 0) {
+                listDiv.innerHTML = '<p class="text-gray-500">No hay tiendas en la base de datos</p>';
+                return;
+            }
+            
+            tiendas.forEach(tienda => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded border';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-semibold">${tienda.nombre.charAt(0)}</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${tienda.nombre}</div>
+                            <div class="text-sm text-gray-600">${tienda.email || 'Sin email'}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm ${tienda.activa ? 'text-green-600' : 'text-red-600'}">
+                            ${tienda.activa ? '✅ Activa' : '❌ Inactiva'}
+                        </div>
+                        <div class="text-xs text-gray-500">ID: ${tienda.id.substring(0, 8)}...</div>
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            });
+        }
+
+        // Iniciar migración
+        async function iniciarMigracion() {
+            const btn = document.getElementById('migrate-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Migrando...';
+            
+            try {
+                addStatus('🚀 Iniciando migración de tiendas...');
+                
+                // Obtener tiendas existentes
+                const existingResult = await window.SimpleSupabaseService.getAllStores();
+                const existingNames = existingResult.success ? 
+                    existingResult.data.map(t => t.nombre.toLowerCase()) : [];
+                
+                let migradas = 0;
+                let saltadas = 0;
+                
+                for (const tienda of tiendasLocales) {
+                    if (existingNames.includes(tienda.nombre.toLowerCase())) {
+                        addStatus(`⏭️ Saltando ${tienda.nombre} (ya existe)`);
+                        saltadas++;
+                        continue;
+                    }
+                    
+                    try {
+                        const result = await window.SimpleSupabaseService.createStore(tienda);
+                        
+                        if (result.success) {
+                            addStatus(`✅ Migrada: ${tienda.nombre}`);
+                            migradas++;
+                        } else {
+                            addStatus(`❌ Error migrando ${tienda.nombre}: ${result.error}`, true);
+                        }
+                        
+                        // Pausa pequeña entre inserciones
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                    } catch (error) {
+                        addStatus(`❌ Error con ${tienda.nombre}: ${error.message}`, true);
+                    }
+                }
+                
+                addStatus(`🎉 Migración completada: ${migradas} migradas, ${saltadas} saltadas`);
+                
+                // Verificar resultado final
+                setTimeout(verificarTiendas, 1000);
+                
+            } catch (error) {
+                addStatus(`❌ Error en migración: ${error.message}`, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Iniciar Migración';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                addStatus('📋 Sistema listo para migración');
+                addStatus(`📦 ${tiendasLocales.length} tiendas locales disponibles para migrar`);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

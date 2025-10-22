@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "nombre": "Samsung Galaxy S25",
+    "descripcion": "Smartphone de última generación con cámara de 108MP y 5G",
+    "precio": 899999,
+    "imagen": "img/products/samsung_s25.jpg",
+    "categoria": "Electrónicos",
+    "tienda_id": 1,
+    "stock": 15,
+    "destacado": true,
+    "fecha_agregado": "2024-10-01",
+    "especificaciones": {
+      "pantalla": "6.8 pulgadas AMOLED",
+      "memoria": "256GB",
+      "ram": "12GB",
+      "bateria": "5000mAh"
+    }
+  },
+  {
+    "id": 2,
+    "nombre": "Notebook Gamer HP",
+    "descripcion": "Laptop gaming con RTX 4060 y procesador Intel i7",
+    "precio": 1299999,
+    "imagen": "img/products/notebook.jpg",
+    "categoria": "Electrónicos",
+    "tienda_id": 1,
+    "stock": 8,
+    "destacado": false,
+    "fecha_agregado": "2024-09-15",
+    "especificaciones": {
+      "procesador": "Intel i7-12700H",
+      "grafica": "RTX 4060",
+      "ram": "16GB DDR5",
+      "almacenamiento": "1TB SSD"
+    }
+  },
+  {
+    "id": 3,
+    "nombre": "Auriculares Bluetooth",
+    "descripcion": "Auriculares inalámbricos con cancelación de ruido",
+    "precio": 89999,
+    "imagen": "img/products/auriculares.jpg",
+    "categoria": "Electrónicos",
+    "tienda_id": 1,
+    "stock": 25,
+    "destacado": true,
+    "fecha_agregado": "2024-09-20",
+    "especificaciones": {
+      "autonomia": "30 horas",
+      "conectividad": "Bluetooth 5.2",
+      "cancelacion_ruido": "Activa",
+      "resistencia": "IPX4"
+    }
+  },
+  {
+    "id": 4,
+    "nombre": "Perfume Yves Saint Laurent",
+    "descripcion": "Fragancia premium para mujer, 100ml",
+    "precio": 129999,
+    "imagen": "img/products/yves.png",
+    "categoria": "Belleza",
+    "tienda_id": 2,
+    "stock": 12,
+    "destacado": true,
+    "fecha_agregado": "2024-10-05",
+    "especificaciones": {
+      "volumen": "100ml",
+      "tipo": "Eau de Parfum",
+      "familia_olfativa": "Floral Oriental",
+      "duracion": "8-10 horas"
+    }
+  },
+  {
+    "id": 5,
+    "nombre": "Smartphone Básico",
+    "descripcion": "Teléfono básico con buena relación calidad-precio",
+    "precio": 199999,
+    "imagen": "img/products/smartphone.jpg",
+    "categoria": "Electrónicos",
+    "tienda_id": 3,
+    "stock": 20,
+    "destacado": false,
+    "fecha_agregado": "2024-09-28",
+    "especificaciones": {
+      "pantalla": "6.1 pulgadas LCD",
+      "memoria": "64GB",
+      "ram": "4GB",
+      "bateria": "4000mAh"
+    }
+  }
+]

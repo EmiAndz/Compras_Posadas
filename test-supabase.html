@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Connection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Test Conexión Supabase</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Resultados de Prueba</h2>
+            <div id="results" class="space-y-2">
+                <p class="text-gray-600">Cargando...</p>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <button onclick="testCategories()" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">
+                Probar Categorías
+            </button>
+            <button onclick="testStores()" class="bg-green-500 text-white px-4 py-2 rounded">
+                Probar Tiendas
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/simpleServices.js"></script>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = isError ? 'text-red-600' : 'text-green-600';
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        async function testSupabaseConnection() {
+            try {
+                if (window.supabaseClient) {
+                    addResult('✅ Cliente Supabase cargado correctamente');
+                } else {
+                    addResult('❌ Cliente Supabase no disponible', true);
+                    return;
+                }
+                
+                if (window.SimpleSupabaseService) {
+                    addResult('✅ SimpleSupabaseService disponible');
+                } else {
+                    addResult('❌ SimpleSupabaseService no disponible', true);
+                }
+                
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testCategories() {
+            try {
+                addResult('🔄 Probando categorías...');
+                const result = await window.SimpleSupabaseService.getAllCategories();
+                
+                if (result.success) {
+                    addResult(`✅ ${result.data.length} categorías obtenidas`);
+                    result.data.forEach(cat => {
+                        addResult(`  - ${cat.nombre} (ID: ${cat.id})`);
+                    });
+                } else {
+                    addResult(`❌ Error obteniendo categorías: ${result.error}`, true);
+                }
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, true);
+            }
+        }
+        
+        async function testStores() {
+            try {
+                addResult('🔄 Probando tiendas...');
+                const result = await window.SimpleSupabaseService.getAllStores();
+                
+                if (result.success) {
+                    addResult(`✅ ${result.data.length} tiendas obtenidas`);
+                    result.data.forEach(store => {
+                        addResult(`  - ${store.nombre} (ID: ${store.id})`);
+                    });
+                } else {
+                    addResult(`❌ Error obteniendo tiendas: ${result.error}`, true);
+                }
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, true);
+            }
+        }
+        
+        // Inicializar cuando la página esté cargada
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                results.innerHTML = '';
+                testSupabaseConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

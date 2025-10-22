@@ -6,16 +6,20 @@
   <title>Compras Posadas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/styles.css" />
+  
+  <!-- AOS (Animate On Scroll) Plugin -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
 <body>
   <!-- Topbar -->
-  <header class="topbar">
+  <header class="topbar" data-aos="fade-down" data-aos-duration="800">
     <div class="topbar__wrap">
-      <a class="brand" href="#">
+      <a class="brand" href="#" data-aos="fade-right" data-aos-delay="200">
         <span class="logo-icon"></span>
         <span class="brand__name"><strong>Compras</strong> Posadas</span>
       </a>
-      <form class="search" role="search" aria-label="Buscar productos">
+      <form class="search" role="search" aria-label="Buscar productos" data-aos="fade-up" data-aos-delay="300">
         <input 
           type="search" 
           placeholder="Buscar por producto, categoría, tienda" 
@@ -28,7 +32,7 @@
           </svg>
         </button>
       </form>
-      <nav class="actions">
+      <nav class="actions" data-aos="fade-left" data-aos-delay="400">
         <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
           <span class="icon-heart" aria-hidden="true">♥</span>
           Lista deseos
@@ -99,7 +103,7 @@
     <main class="main">
 
       <!-- Carrusel/Slider de banners -->
-      <section class="carousel" aria-label="Banners promocionales">
+      <section class="carousel" aria-label="Banners promocionales" data-aos="zoom-in" data-aos-duration="1000">
         <div class="carousel__viewport">
           <div class="carousel__slide" data-index="0" style="background-image:url('img/banners/copalibertadores.jpg');"></div>
           <div class="carousel__slide" data-index="1" style="background-image:url('img/products/samsung_s25.jpg');"></div>
@@ -114,7 +118,7 @@
       <section role="region" aria-label="Productos recomendados" class="py-8 px-4 max-w-7xl mx-auto">
         <div class="grid grid-cols-12 gap-6 lg:gap-8">
           <!-- Banner fijo izquierda -->
-          <div class="col-span-12 lg:col-span-3">
+          <div class="col-span-12 lg:col-span-3" data-aos="fade-right" data-aos-duration="800">
             <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800 p-6 h-full min-h-[300px] flex flex-col justify-center items-center text-white">
               <div class="absolute inset-0 bg-black bg-opacity-20"></div>
               <div class="relative z-10 text-center">
@@ -129,7 +133,7 @@
           </div>
 
           <!-- Carrusel derecha -->
-          <div class="col-span-12 lg:col-span-9">
+          <div class="col-span-12 lg:col-span-9" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
             <div class="relative">
               <!-- Contenedor del carrusel -->
               <div id="recomendados-carousel" class="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
@@ -258,10 +262,15 @@
           const track = document.getElementById('recomendados-track');
           track.innerHTML = '';
 
-          recomendados.forEach(producto => {
+          recomendados.forEach((producto, index) => {
             const card = document.createElement('div');
             card.className = 'snap-start rounded-2xl border border-gray-200 bg-white shadow-sm p-4 hover:shadow-md transition-shadow duration-200 flex-shrink-0';
             card.setAttribute('data-card-id', producto.id);
+            
+            // Agregar atributos AOS para animaciones
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', (index * 100).toString());
+            card.setAttribute('data-aos-duration', '600');
             
             card.innerHTML = `
               <div class="relative">
@@ -818,5 +827,36 @@
   </aside>
 
   <script src="assets/js/script.js"></script>
+  
+  <!-- Inicialización del plugin AOS -->
+  <script>
+    // Inicializar AOS cuando el documento esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      AOS.init({
+        duration: 600,    // Duración por defecto de las animaciones
+        easing: 'ease-in-out',  // Tipo de transición
+        once: true,       // Las animaciones solo ocurren una vez
+        offset: 50,       // Offset desde el trigger point
+        delay: 0,         // Delay por defecto
+      });
+      
+      // Refresh AOS cuando se redimensiona la ventana
+      window.addEventListener('resize', function() {
+        AOS.refresh();
+      });
+      
+      // Refresh AOS cuando se cargan nuevos productos dinámicamente
+      const originalRenderRecomendados = window.renderRecomendados;
+      if (originalRenderRecomendados) {
+        window.renderRecomendados = function() {
+          originalRenderRecomendados();
+          // Refresh AOS después de cargar nuevos elementos
+          setTimeout(() => {
+            AOS.refresh();
+          }, 100);
+        };
+      }
+    });
+  </script>
 </body>
 </html>

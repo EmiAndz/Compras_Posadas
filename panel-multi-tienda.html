@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Multi-Tienda - Compras Posadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="img/logo/logo.png" alt="Compras Posadas" class="h-10">
+                    <h1 class="text-2xl font-bold text-blue-600">Panel Multi-Tienda</h1>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600">Inicio</a>
+                    <a href="agregar-producto.html" class="text-gray-600 hover:text-blue-600">Agregar Producto</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Selector de Tienda -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🏪 Seleccionar Tienda</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="tienda-selector" class="block text-sm font-medium text-gray-700 mb-2">
+                        Selecciona tu tienda:
+                    </label>
+                    <select id="tienda-selector" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Cargando tiendas...</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="seleccionarTienda()" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Seleccionar Tienda
+                    </button>
+                </div>
+            </div>
+            
+            <div id="tienda-info" class="mt-4 p-4 bg-gray-50 rounded hidden">
+                <h3 class="font-semibold mb-2">Información de la Tienda:</h3>
+                <div id="tienda-detalles"></div>
+            </div>
+        </div>
+
+        <!-- Estado de Tiendas -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">📊 Estado de las Tiendas</h2>
+            <div id="tiendas-status" class="space-y-3">
+                <p class="text-gray-600">Cargando información de tiendas...</p>
+            </div>
+        </div>
+
+        <!-- Productos por Tienda -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">📦 Productos por Tienda</h2>
+            <div id="productos-por-tienda" class="space-y-4">
+                <p class="text-gray-600">Selecciona una tienda para ver sus productos...</p>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="agregar-producto.html" 
+               class="bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600 transition">
+                <div class="text-2xl mb-2">➕</div>
+                <div class="font-semibold">Agregar Producto</div>
+                <div class="text-sm opacity-90">Como tienda seleccionada</div>
+            </a>
+            
+            <button onclick="verTodosLosProductos()" 
+                    class="bg-blue-500 text-white p-4 rounded-lg text-center hover:bg-blue-600 transition">
+                <div class="text-2xl mb-2">📋</div>
+                <div class="font-semibold">Ver Todos</div>
+                <div class="text-sm opacity-90">Productos de todas las tiendas</div>
+            </button>
+            
+            <button onclick="sincronizarTiendas()" 
+                    class="bg-purple-500 text-white p-4 rounded-lg text-center hover:bg-purple-600 transition">
+                <div class="text-2xl mb-2">🔄</div>
+                <div class="font-semibold">Sincronizar</div>
+                <div class="text-sm opacity-90">Actualizar datos de tiendas</div>
+            </button>
+        </div>
+    </main>
+
+    <!-- Scripts de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/simpleServices.js"></script>
+    
+    <script>
+        let tiendas = [];
+        let tiendaSeleccionada = null;
+
+        // Cargar tiendas al iniciar
+        async function cargarTiendas() {
+            try {
+                console.log('🔄 Cargando tiendas desde Supabase...');
+                const result = await window.SimpleSupabaseService.getAllStores();
+                
+                if (result.success) {
+                    tiendas = result.data;
+                    mostrarTiendasEnSelector();
+                    mostrarEstadoTiendas();
+                    console.log(`✅ ${tiendas.length} tiendas cargadas`);
+                } else {
+                    throw new Error('No se pudieron cargar las tiendas');
+                }
+            } catch (error) {
+                console.error('❌ Error cargando tiendas:', error);
+                showError('Error cargando tiendas: ' + error.message);
+            }
+        }
+
+        // Mostrar tiendas en el selector
+        function mostrarTiendasEnSelector() {
+            const selector = document.getElementById('tienda-selector');
+            selector.innerHTML = '<option value="">Selecciona una tienda...</option>';
+            
+            tiendas.forEach(tienda => {
+                const option = document.createElement('option');
+                option.value = tienda.id;
+                option.textContent = `${tienda.nombre} - ${tienda.email || 'Sin email'}`;
+                selector.appendChild(option);
+            });
+        }
+
+        // Mostrar estado de todas las tiendas
+        function mostrarEstadoTiendas() {
+            const container = document.getElementById('tiendas-status');
+            container.innerHTML = '';
+            
+            tiendas.forEach(tienda => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded border';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-semibold">${tienda.nombre.charAt(0)}</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${tienda.nombre}</div>
+                            <div class="text-sm text-gray-600">${tienda.email || 'Sin email'}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-green-600">✅ Activa</div>
+                        <div class="text-xs text-gray-500">ID: ${tienda.id.substring(0, 8)}...</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Seleccionar tienda
+        function seleccionarTienda() {
+            const selector = document.getElementById('tienda-selector');
+            const tiendaId = selector.value;
+            
+            if (!tiendaId) {
+                showError('Por favor selecciona una tienda');
+                return;
+            }
+            
+            tiendaSeleccionada = tiendas.find(t => t.id === tiendaId);
+            
+            if (tiendaSeleccionada) {
+                // Guardar en localStorage para que el formulario lo use
+                localStorage.setItem('currentStoreId', tiendaSeleccionada.id);
+                localStorage.setItem('currentStoreName', tiendaSeleccionada.nombre);
+                
+                // Mostrar información de la tienda
+                mostrarInfoTienda();
+                
+                // Cargar productos de esta tienda
+                cargarProductosTienda();
+                
+                showSuccess(`Tienda "${tiendaSeleccionada.nombre}" seleccionada correctamente`);
+            }
+        }
+
+        // Mostrar información de la tienda seleccionada
+        function mostrarInfoTienda() {
+            const infoDiv = document.getElementById('tienda-info');
+            const detallesDiv = document.getElementById('tienda-detalles');
+            
+            detallesDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <strong>Nombre:</strong> ${tiendaSeleccionada.nombre}<br>
+                        <strong>Email:</strong> ${tiendaSeleccionada.email || 'No especificado'}<br>
+                        <strong>Teléfono:</strong> ${tiendaSeleccionada.telefono || 'No especificado'}
+                    </div>
+                    <div>
+                        <strong>Dirección:</strong> ${tiendaSeleccionada.direccion || 'No especificada'}<br>
+                        <strong>Activa:</strong> ${tiendaSeleccionada.activa ? 'Sí' : 'No'}<br>
+                        <strong>ID:</strong> ${tiendaSeleccionada.id}
+                    </div>
+                </div>
+            `;
+            
+            infoDiv.classList.remove('hidden');
+        }
+
+        // Cargar productos de la tienda seleccionada
+        async function cargarProductosTienda() {
+            try {
+                const result = await window.SimpleSupabaseService.getAllProducts();
+                
+                if (result.success) {
+                    const productosDeEstaTienda = result.data.filter(p => p.tienda_id === tiendaSeleccionada.id);
+                    mostrarProductosTienda(productosDeEstaTienda);
+                }
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        // Mostrar productos de la tienda
+        function mostrarProductosTienda(productos) {
+            const container = document.getElementById('productos-por-tienda');
+            
+            if (productos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-8 text-gray-500">
+                        <div class="text-4xl mb-4">📦</div>
+                        <div class="text-lg font-semibold">Sin productos</div>
+                        <div class="text-sm">Esta tienda aún no tiene productos publicados</div>
+                        <a href="agregar-producto.html" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Agregar Primer Producto
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <h3 class="font-semibold mb-3">Productos de ${tiendaSeleccionada.nombre} (${productos.length})</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${productos.map(producto => `
+                        <div class="border rounded-lg p-4">
+                            ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-32 object-cover rounded mb-2">` : '<div class="w-full h-32 bg-gray-200 rounded mb-2 flex items-center justify-center"><span class="text-gray-400">Sin imagen</span></div>'}
+                            <h4 class="font-semibold">${producto.nombre}</h4>
+                            <p class="text-green-600 font-bold">$${producto.precio.toLocaleString()}</p>
+                            <p class="text-sm text-gray-600">Stock: ${producto.stock}</p>
+                            <div class="text-xs text-gray-500 mt-2">
+                                ID: ${producto.id.substring(0, 8)}...
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Ver todos los productos
+        async function verTodosLosProductos() {
+            try {
+                const result = await window.SimpleSupabaseService.getAllProducts();
+                
+                if (result.success) {
+                    const container = document.getElementById('productos-por-tienda');
+                    const productosPorTienda = {};
+                    
+                    // Agrupar productos por tienda
+                    result.data.forEach(producto => {
+                        const tiendaNombre = tiendas.find(t => t.id === producto.tienda_id)?.nombre || 'Tienda desconocida';
+                        if (!productosPorTienda[tiendaNombre]) {
+                            productosPorTienda[tiendaNombre] = [];
+                        }
+                        productosPorTienda[tiendaNombre].push(producto);
+                    });
+                    
+                    let html = '<h3 class="font-semibold mb-4">Todos los Productos por Tienda</h3>';
+                    
+                    Object.keys(productosPorTienda).forEach(tiendaNombre => {
+                        const productos = productosPorTienda[tiendaNombre];
+                        html += `
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold text-blue-600 mb-3">${tiendaNombre} (${productos.length} productos)</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    ${productos.map(p => `
+                                        <div class="border rounded p-3">
+                                            <div class="font-medium text-sm">${p.nombre}</div>
+                                            <div class="text-green-600 font-bold">$${p.precio.toLocaleString()}</div>
+                                            <div class="text-xs text-gray-500">Stock: ${p.stock}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                showError('Error cargando todos los productos: ' + error.message);
+            }
+        }
+
+        // Sincronizar tiendas (recargar)
+        function sincronizarTiendas() {
+            showSuccess('Sincronizando tiendas...');
+            cargarTiendas();
+        }
+
+        // Funciones de utilidad
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Inicializar cuando la página esté cargada
+        document.addEventListener('DOMContentLoaded', () => {
+            // Esperar a que Supabase esté disponible
+            setTimeout(cargarTiendas, 1000);
+            
+            // Verificar si hay una tienda previamente seleccionada
+            const savedStoreId = localStorage.getItem('currentStoreId');
+            const savedStoreName = localStorage.getItem('currentStoreName');
+            
+            if (savedStoreId && savedStoreName) {
+                showSuccess(`Tienda activa: ${savedStoreName}`);
+            }
+        });
+    </script>
+</body>
+</html>

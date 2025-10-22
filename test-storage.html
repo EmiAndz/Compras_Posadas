@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Storage - Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">🧪 Test Supabase Storage</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4">📤 Probar Subida de Imagen</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Seleccionar imagen de prueba:
+                    </label>
+                    <input type="file" id="test-image" accept="image/*" 
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                
+                <button onclick="testImageUpload()" 
+                        class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400" 
+                        id="upload-btn">
+                    🚀 Probar Subida
+                </button>
+            </div>
+            
+            <div id="upload-result" class="mt-4 p-4 bg-gray-50 rounded hidden">
+                <h3 class="font-semibold mb-2">Resultado:</h3>
+                <div id="result-content"></div>
+            </div>
+            
+            <div id="image-preview" class="mt-4 hidden">
+                <h3 class="font-semibold mb-2">Vista previa:</h3>
+                <img id="preview-img" class="max-w-xs h-48 object-cover rounded border">
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">📊 Estado del Sistema</h2>
+            <div id="system-status" class="space-y-2">
+                <p class="text-gray-600">Cargando estado...</p>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="agregar-producto.html" 
+               class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 inline-block">
+                ✅ Ir al Formulario de Productos
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/simpleServices.js"></script>
+    
+    <script>
+        let uploadedImagePath = null;
+        
+        // Función para mostrar resultados
+        function showResult(message, isError = false, details = null) {
+            const resultDiv = document.getElementById('upload-result');
+            const contentDiv = document.getElementById('result-content');
+            
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = `mt-4 p-4 rounded ${isError ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`;
+            
+            let content = `<p class="${isError ? 'text-red-700' : 'text-green-700'}">${message}</p>`;
+            
+            if (details) {
+                content += `<pre class="mt-2 text-xs text-gray-600 overflow-auto">${JSON.stringify(details, null, 2)}</pre>`;
+            }
+            
+            contentDiv.innerHTML = content;
+        }
+        
+        // Probar subida de imagen
+        async function testImageUpload() {
+            const fileInput = document.getElementById('test-image');
+            const uploadBtn = document.getElementById('upload-btn');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                showResult('❌ Por favor selecciona una imagen primero', true);
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '⏳ Subiendo...';
+            
+            try {
+                console.log('🧪 Probando subida de imagen:', file.name);
+                
+                const result = await window.SimpleSupabaseService.uploadProductImage(file, 'test_product');
+                
+                if (result.success) {
+                    uploadedImagePath = result.path;
+                    showResult(`✅ ¡Imagen subida exitosamente!`, false, {
+                        url: result.url,
+                        path: result.path,
+                        fileSize: `${(file.size / 1024).toFixed(1)} KB`,
+                        fileName: file.name
+                    });
+                    
+                    // Mostrar vista previa
+                    const previewDiv = document.getElementById('image-preview');
+                    const previewImg = document.getElementById('preview-img');
+                    previewImg.src = result.url;
+                    previewDiv.classList.remove('hidden');
+                    
+                } else {
+                    showResult(`❌ Error subiendo imagen: ${result.error}`, true, result);
+                }
+                
+            } catch (error) {
+                console.error('Error en test:', error);
+                showResult(`❌ Error inesperado: ${error.message}`, true, error);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '🚀 Probar Subida';
+            }
+        }
+        
+        // Verificar estado del sistema
+        async function checkSystemStatus() {
+            const statusDiv = document.getElementById('system-status');
+            
+            function addStatus(message, isOk = true) {
+                const p = document.createElement('p');
+                p.className = isOk ? 'text-green-600' : 'text-red-600';
+                p.textContent = message;
+                statusDiv.appendChild(p);
+            }
+            
+            statusDiv.innerHTML = '';
+            
+            try {
+                // Verificar Supabase Client
+                if (window.supabaseClient) {
+                    addStatus('✅ Cliente Supabase cargado');
+                } else {
+                    addStatus('❌ Cliente Supabase no disponible', false);
+                    return;
+                }
+                
+                // Verificar Services
+                if (window.SimpleSupabaseService) {
+                    addStatus('✅ SimpleSupabaseService disponible');
+                } else {
+                    addStatus('❌ SimpleSupabaseService no disponible', false);
+                }
+                
+                // Verificar Storage
+                if (window.supabaseClient.storage) {
+                    addStatus('✅ Supabase Storage disponible');
+                } else {
+                    addStatus('❌ Supabase Storage no disponible', false);
+                }
+                
+                // Probar conexión con categorías
+                try {
+                    const categoriesResult = await window.SimpleSupabaseService.getAllCategories();
+                    if (categoriesResult.success) {
+                        addStatus(`✅ Base de datos conectada (${categoriesResult.data.length} categorías)`);
+                    } else {
+                        addStatus('❌ Error conectando a base de datos', false);
+                    }
+                } catch (error) {
+                    addStatus(`❌ Error de base de datos: ${error.message}`, false);
+                }
+                
+            } catch (error) {
+                addStatus(`❌ Error general: ${error.message}`, false);
+            }
+        }
+        
+        // Inicializar cuando la página esté cargada
+        window.addEventListener('load', () => {
+            setTimeout(checkSystemStatus, 1000);
+        });
+    </script>
+</body>
+</html>

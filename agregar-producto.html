@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Producto - Compras Posadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="img/logo/logo.png" alt="Compras Posadas" class="h-10">
+                    <h1 class="text-2xl font-bold text-blue-600">Panel de Vendedor</h1>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600">Inicio</a>
+                    <a href="panel-multi-tienda.html" class="text-gray-600 hover:text-blue-600">Panel Tiendas</a>
+                    <a href="#" class="text-blue-600 font-medium">Agregar Producto</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="mb-6">
+                <ol class="flex items-center space-x-2 text-sm text-gray-500">
+                    <li><a href="index.html" class="hover:text-blue-600">Inicio</a></li>
+                    <li>/</li>
+                    <li><a href="panel-multi-tienda.html" class="hover:text-blue-600">Panel Tiendas</a></li>
+                    <li>/</li>
+                    <li class="text-gray-900">Agregar Producto</li>
+                </ol>
+            </nav>
+
+            <!-- Información de la Tienda Activa -->
+            <div id="tienda-activa" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-semibold" id="tienda-inicial"></span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-blue-900" id="tienda-nombre">Cargando...</div>
+                            <div class="text-sm text-blue-600">Tienda activa para publicar productos</div>
+                        </div>
+                    </div>
+                    <a href="panel-multi-tienda.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Cambiar Tienda
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alerta si no hay tienda seleccionada -->
+            <div id="sin-tienda" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 hidden">
+                <div class="flex items-center space-x-3">
+                    <div class="text-yellow-600 text-xl">⚠️</div>
+                    <div>
+                        <div class="font-semibold text-yellow-900">No hay tienda seleccionada</div>
+                        <div class="text-sm text-yellow-700">Debes seleccionar una tienda antes de agregar productos.</div>
+                    </div>
+                    <a href="panel-multi-tienda.html" class="ml-auto bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+                        Seleccionar Tienda
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Agregar Nuevo Producto</h2>
+                    <p class="text-gray-600 mt-2">Completa la información de tu producto</p>
+                </div>
+
+                <form id="product-form" class="space-y-6">
+                    <!-- Información básica -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                                Nombre del Producto *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="nombre" 
+                                name="nombre" 
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Ej: Samsung Galaxy S25"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="precio" class="block text-sm font-medium text-gray-700 mb-2">
+                                Precio (ARS) *
+                            </label>
+                            <input 
+                                type="number" 
+                                id="precio" 
+                                name="precio" 
+                                required
+                                min="0"
+                                step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="199999"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Categoría y Stock -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="categoria" class="block text-sm font-medium text-gray-700 mb-2">
+                                Categoría *
+                            </label>
+                            <select 
+                                id="categoria" 
+                                name="categoria" 
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Seleccionar categoría</option>
+                                <!-- Se llenarán dinámicamente -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                                Stock disponible *
+                            </label>
+                            <input 
+                                type="number" 
+                                id="stock" 
+                                name="stock" 
+                                required
+                                min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="10"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div>
+                        <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
+                            Descripción *
+                        </label>
+                        <textarea 
+                            id="descripcion" 
+                            name="descripcion" 
+                            required
+                            rows="4"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Describe las características principales de tu producto..."
+                        ></textarea>
+                    </div>
+
+                    <!-- Imagen -->
+                    <div>
+                        <label for="imagen" class="block text-sm font-medium text-gray-700 mb-2">
+                            Imagen del Producto
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <input 
+                                type="file" 
+                                id="imagen" 
+                                name="imagen" 
+                                accept="image/*"
+                                class="hidden"
+                            >
+                            <button 
+                                type="button" 
+                                onclick="document.getElementById('imagen').click()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Seleccionar Imagen
+                            </button>
+                            <span id="file-name" class="text-sm text-gray-500">Ningún archivo seleccionado</span>
+                        </div>
+                        <div id="image-preview" class="mt-4 hidden">
+                            <img id="preview-img" src="" alt="Vista previa" class="max-w-xs h-32 object-cover rounded-md border">
+                        </div>
+                    </div>
+
+                    <!-- Especificaciones adicionales -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Especificaciones Adicionales
+                        </label>
+                        <div id="especificaciones-container" class="space-y-3">
+                            <div class="flex space-x-2">
+                                <input 
+                                    type="text" 
+                                    placeholder="Característica (ej: Pantalla)"
+                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                <input 
+                                    type="text" 
+                                    placeholder="Valor (ej: 6.8 pulgadas)"
+                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                <button 
+                                    type="button" 
+                                    onclick="removeSpecification(this)"
+                                    class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-md"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            onclick="addSpecification()"
+                            class="mt-2 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                            + Agregar especificación
+                        </button>
+                    </div>
+
+                    <!-- Producto destacado -->
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="destacado" 
+                            name="destacado"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <label for="destacado" class="ml-2 block text-sm text-gray-700">
+                            Marcar como producto destacado
+                        </label>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex space-x-4 pt-6">
+                        <button 
+                            type="submit"
+                            class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                        >
+                            Publicar Producto
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="window.history.back()"
+                            class="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 font-medium"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <span class="text-green-600 text-2xl">✓</span>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">¡Producto Agregado!</h3>
+                <p class="text-sm text-gray-500 mb-4">Tu producto ha sido publicado exitosamente.</p>
+                <button 
+                    onclick="closeModal()"
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                >
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/simpleServices.js"></script>
+    
+    <script src="assets/js/product-form.js"></script>
+    
+    <!-- Script para mostrar tienda activa -->
+    <script>
+        // Mostrar información de la tienda activa
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedStoreId = localStorage.getItem('currentStoreId');
+            const savedStoreName = localStorage.getItem('currentStoreName');
+            
+            const tiendaActivaDiv = document.getElementById('tienda-activa');
+            const sinTiendaDiv = document.getElementById('sin-tienda');
+            const tiendaInicialSpan = document.getElementById('tienda-inicial');
+            const tiendaNombreDiv = document.getElementById('tienda-nombre');
+            
+            if (savedStoreId && savedStoreName) {
+                // Mostrar tienda activa
+                tiendaActivaDiv.classList.remove('hidden');
+                sinTiendaDiv.classList.add('hidden');
+                
+                tiendaInicialSpan.textContent = savedStoreName.charAt(0).toUpperCase();
+                tiendaNombreDiv.textContent = savedStoreName;
+                
+                console.log(`🏪 Tienda activa: ${savedStoreName} (${savedStoreId})`);
+            } else {
+                // Mostrar alerta de sin tienda
+                tiendaActivaDiv.classList.add('hidden');
+                sinTiendaDiv.classList.remove('hidden');
+                
+                console.log('⚠️ No hay tienda seleccionada');
+            }
+        });
+    </script>
+</body>
+</html>

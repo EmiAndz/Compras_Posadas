@@ -1,0 +1,38 @@
+[
+  {
+    "id": "electronica",
+    "nombre": "Electrónicos",
+    "descripcion": "Smartphones, laptops, tablets y accesorios",
+    "icono": "📱"
+  },
+  {
+    "id": "moda",
+    "nombre": "Moda",
+    "descripcion": "Ropa, zapatos y accesorios de vestir",
+    "icono": "👕"
+  },
+  {
+    "id": "hogar",
+    "nombre": "Hogar",
+    "descripcion": "Muebles, decoración y artículos para el hogar",
+    "icono": "🏠"
+  },
+  {
+    "id": "belleza",
+    "nombre": "Belleza",
+    "descripcion": "Cosméticos, perfumes y cuidado personal",
+    "icono": "💄"
+  },
+  {
+    "id": "deportes",
+    "nombre": "Deportes",
+    "descripcion": "Ropa deportiva, equipamiento y accesorios",
+    "icono": "⚽"
+  },
+  {
+    "id": "libros",
+    "nombre": "Libros",
+    "descripcion": "Literatura, educación y entretenimiento",
+    "icono": "📚"
+  }
+]

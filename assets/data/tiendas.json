@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nombre": "TechStore",
+    "descripcion": "Electrónicos y tecnología",
+    "logo": "img/stores/techstore.jpg",
+    "propietario": "Juan Pérez",
+    "email": "juan@techstore.com",
+    "telefono": "3757-123456",
+    "direccion": "Av. Libertad 123, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-01-15"
+  },
+  {
+    "id": 2,
+    "nombre": "Moda & Estilo",
+    "descripcion": "Ropa y accesorios",
+    "logo": "img/stores/modaestilo.jpg",
+    "propietario": "María González",
+    "email": "maria@modaestilo.com",
+    "telefono": "3757-789012",
+    "direccion": "San Martín 456, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-02-20"
+  },
+  {
+    "id": 3,
+    "nombre": "Casa & Hogar",
+    "descripcion": "Artículos para el hogar",
+    "logo": "img/stores/casahogar.jpg",
+    "propietario": "Carlos López",
+    "email": "carlos@casahogar.com",
+    "telefono": "3757-345678",
+    "direccion": "Córdoba 789, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-03-10"
+  }
+]
