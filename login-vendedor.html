@@ -111,6 +111,39 @@
         </div>
     </div>
 
+    <!-- Scripts de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config/supabase.js"></script>
     <script src="assets/js/auth.js"></script>
+
+    <script>
+        // Inicializar Supabase cuando la página cargue
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando página de login...');
+            
+            // Esperar un momento para que los scripts se carguen
+            setTimeout(() => {
+                // Verificar e inicializar Supabase si es necesario
+                if (!window.supabaseClient && window.initializeSupabaseManually) {
+                    console.log('🔧 Inicializando Supabase manualmente...');
+                    window.initializeSupabaseManually();
+                }
+                
+                // Verificar que Supabase esté disponible
+                if (window.supabaseClient) {
+                    console.log('✅ Cliente Supabase disponible en login');
+                } else {
+                    console.error('❌ Cliente Supabase NO disponible en login');
+                    console.log('🔍 Intentando inicializar directamente...');
+                    
+                    // Último intento de inicialización
+                    if (window.supabase && typeof initializeSupabase === 'function') {
+                        window.supabaseClient = initializeSupabase();
+                        console.log('🔄 Inicialización directa completada');
+                    }
+                }
+            }, 500);
+        });
+    </script>
 </body>
 </html>

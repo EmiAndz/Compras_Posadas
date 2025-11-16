@@ -60,8 +60,36 @@ class SimpleSupabaseService {
       };
 
     } catch (error) {
-      console.error('❌ Error obteniendo productos:', error);
-      return { success: false, data: [], error: error.message };
+      console.error('❌ Error creando producto:', error);
+      return { success: false, data: null, error: error.message };
+    }
+  }
+
+  // Eliminar producto
+  static async deleteProduct(productId) {
+    try {
+      console.log(`📡 Eliminando producto ${productId} desde Supabase...`);
+      const client = this.getClient();
+
+      const { error } = await client
+        .from('productos')
+        .delete()
+        .eq('id', productId);
+
+      if (error) {
+        console.error('❌ Error eliminando producto:', error);
+        throw error;
+      }
+
+      console.log('✅ Producto eliminado exitosamente de Supabase');
+      return {
+        success: true,
+        message: 'Producto eliminado exitosamente'
+      };
+
+    } catch (error) {
+      console.error('❌ Error eliminando producto:', error);
+      return { success: false, error: error.message };
     }
   }
 
@@ -166,6 +194,48 @@ class SimpleSupabaseService {
     }
   }
 
+  // Obtener productos por tienda
+  static async getProductsByStore(storeId) {
+    try {
+      console.log(`📡 Obteniendo productos de tienda ${storeId} desde Supabase...`);
+      const client = this.getClient();
+
+      const { data, error } = await client
+        .from('productos')
+        .select(`
+          *,
+          categorias (
+            id,
+            nombre,
+            icono
+          ),
+          tiendas (
+            id,
+            nombre,
+            email
+          )
+        `)
+        .eq('tienda_id', storeId)
+        .eq('activo', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error obteniendo productos de tienda:', error);
+        return { success: false, data: [], error: error.message };
+      }
+
+      console.log(`✅ ${data?.length || 0} productos obtenidos de tienda ${storeId}`);
+      return {
+        success: true,
+        data: data || []
+      };
+
+    } catch (error) {
+      console.error('❌ Error obteniendo productos de tienda:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
   // Crear producto
   static async createProduct(productData) {
     try {
@@ -209,29 +279,126 @@ class SimpleSupabaseService {
     }
   }
 
+  // Actualizar producto
+  static async updateProduct(productId, productData) {
+    try {
+      console.log(`📡 Actualizando producto ${productId} en Supabase...`);
+      console.log('📋 Datos recibidos:', productData);
+      
+      const client = this.getClient();
+
+      const updateData = {
+        nombre: productData.nombre,
+        descripcion: productData.descripcion,
+        precio: parseFloat(productData.precio),
+        categoria_id: productData.categoria_id, // Mantener como string (UUID)
+        stock: parseInt(productData.stock) || 0,
+        destacado: productData.destacado || false
+      };
+
+      console.log('📋 Datos a enviar a Supabase:', updateData);
+
+      // Solo agregar imagen si se proporciona
+      if (productData.imagen) {
+        updateData.imagen = productData.imagen;
+      }
+
+      const { data, error } = await client
+        .from('productos')
+        .update(updateData)
+        .eq('id', productId)
+        .select(`
+          *,
+          categorias (
+            id,
+            nombre,
+            icono
+          ),
+          tiendas (
+            id,
+            nombre,
+            email
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error('❌ Error actualizando producto:', error);
+        console.error('❌ Detalle del error:', error.message);
+        throw error;
+      }
+
+      console.log('✅ Producto actualizado exitosamente en Supabase');
+      return {
+        success: true,
+        data: data,
+        message: 'Producto actualizado exitosamente'
+      };
+
+    } catch (error) {
+      console.error('❌ Error actualizando producto:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al actualizar producto'
+      };
+    }
+  }
+
   // Crear tienda
   static async createStore(storeData) {
     try {
       console.log('📡 Creando tienda en Supabase...');
+      console.log('Datos recibidos:', storeData);
+      
       const client = this.getClient();
+
+      // Validar campos requeridos
+      if (!storeData.nombre) {
+        throw new Error('El nombre de la tienda es requerido');
+      }
+      if (!storeData.email) {
+        throw new Error('El email de la tienda es requerido');
+      }
+      if (!storeData.propietario) {
+        throw new Error('El propietario de la tienda es requerido');
+      }
+
+      const datosLimpios = {
+        nombre: storeData.nombre,
+        descripcion: storeData.descripcion || `Tienda ${storeData.nombre}`,
+        logo: storeData.logo || null,
+        propietario: storeData.propietario,
+        email: storeData.email,
+        telefono: storeData.telefono || null,
+        direccion: storeData.direccion || null,
+        activa: storeData.activa !== undefined ? storeData.activa : true,
+        verificada: storeData.verificada !== undefined ? storeData.verificada : false
+      };
+
+      console.log('Datos a insertar:', datosLimpios);
 
       const { data, error } = await client
         .from('tiendas')
-        .insert([{
-          nombre: storeData.nombre,
-          email: storeData.email || null,
-          telefono: storeData.telefono || null,
-          direccion: storeData.direccion || null,
-          activa: storeData.activa !== undefined ? storeData.activa : true
-        }])
+        .insert([datosLimpios])
         .select();
 
       if (error) {
         console.error('❌ Error creando tienda:', error);
-        throw error;
+        console.error('Código de error:', error.code);
+        console.error('Detalles:', error.details);
+        console.error('Mensaje:', error.message);
+        
+        // Errores más específicos
+        if (error.code === '23505') {
+          throw new Error(`Ya existe una tienda con el email ${storeData.email}`);
+        } else if (error.code === '42501') {
+          throw new Error('Error de permisos: Verifica las políticas RLS de la tabla tiendas');
+        } else {
+          throw new Error(`Error de BD: ${error.message}`);
+        }
       }
 
-      console.log('✅ Tienda creada exitosamente en Supabase');
+      console.log('✅ Tienda creada exitosamente:', data[0]);
       return {
         success: true,
         data: data[0],

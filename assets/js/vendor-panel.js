@@ -22,21 +22,43 @@ class VendorPanel {
 
     async loadData() {
         try {
-            // Cargar productos
-            const response = await fetch('assets/data/productos.json');
-            const allProducts = await response.json();
+            console.log('🔄 Cargando datos desde Supabase...');
             
-            // Filtrar productos de la tienda actual
-            this.products = allProducts.filter(p => p.tienda_id === this.currentStore.id);
-            this.filteredProducts = [...this.products];
+            // Usar el UUID de Supabase directamente
+            let storeId = this.currentStore.supabase_id || this.currentStore.id;
+            console.log('📍 Usando Store ID:', storeId, 'para tienda:', this.currentStore.nombre);
+            
+            // Cargar productos de la tienda desde Supabase
+            const productsResult = await SimpleSupabaseService.getProductsByStore(storeId);
+            if (productsResult.success) {
+                this.products = productsResult.data;
+                this.filteredProducts = [...this.products];
+                console.log(`✅ ${this.products.length} productos cargados para tienda ${this.currentStore.nombre}`);
+                
+                // Debug: Verificar estructura de productos
+                if (this.products.length > 0) {
+                    console.log('🔍 Estructura del primer producto:', this.products[0]);
+                    console.log('🏷️ Categoría del primer producto:', this.products[0].categorias);
+                }
+            } else {
+                console.error('❌ Error cargando productos:', productsResult.error);
+                this.products = [];
+                this.filteredProducts = [];
+            }
 
-            // Cargar categorías para filtros
-            const categoriesResponse = await fetch('assets/data/categorias.json');
-            const categories = await categoriesResponse.json();
-            this.populateCategories(categories);
+            // Cargar categorías desde Supabase
+            const categoriesResult = await SimpleSupabaseService.getAllCategories();
+            if (categoriesResult.success) {
+                this.populateCategories(categoriesResult.data);
+                console.log('✅ Categorías cargadas desde Supabase');
+            } else {
+                console.error('❌ Error cargando categorías:', categoriesResult.error);
+            }
 
         } catch (error) {
-            console.error('Error cargando datos:', error);
+            console.error('❌ Error cargando datos:', error);
+            this.products = [];
+            this.filteredProducts = [];
         }
     }
 
@@ -85,12 +107,26 @@ class VendorPanel {
     }
 
     populateCategories(categories) {
-        const select = document.getElementById('category-filter');
+        // Llenar filtro de categorías
+        const selectFilter = document.getElementById('category-filter');
+        selectFilter.innerHTML = '<option value="">Todas las categorías</option>';
+        
+        // Llenar select del modal de edición
+        const selectEdit = document.getElementById('edit-categoria');
+        selectEdit.innerHTML = '<option value="">Seleccionar categoría</option>';
+        
         categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.nombre;
-            option.textContent = category.nombre;
-            select.appendChild(option);
+            // Opción para filtro
+            const optionFilter = document.createElement('option');
+            optionFilter.value = category.nombre;
+            optionFilter.textContent = category.nombre;
+            selectFilter.appendChild(optionFilter);
+            
+            // Opción para edición
+            const optionEdit = document.createElement('option');
+            optionEdit.value = category.id;
+            optionEdit.textContent = category.nombre;
+            selectEdit.appendChild(optionEdit);
         });
     }
 
@@ -105,7 +141,8 @@ class VendorPanel {
                                 product.descripcion.toLowerCase().includes(searchTerm);
 
             // Filtro de categoría
-            const matchesCategory = !categoryFilter || product.categoria === categoryFilter;
+            const productCategory = product.categorias ? product.categorias.nombre : (product.categoria || '');
+            const matchesCategory = !categoryFilter || productCategory === categoryFilter;
 
             // Filtro de estado
             let matchesStatus = true;
@@ -155,7 +192,7 @@ class VendorPanel {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        ${product.categoria}
+                        ${product.categorias ? product.categorias.nombre : (product.categoria || 'Sin categoría')}
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -178,13 +215,13 @@ class VendorPanel {
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex space-x-2">
                         <button 
-                            onclick="vendorPanel.editProduct(${product.id})"
+                            onclick="vendorPanel.editProduct('${product.id}')"
                             class="text-blue-600 hover:text-blue-900"
                         >
                             Editar
                         </button>
                         <button 
-                            onclick="vendorPanel.deleteProduct(${product.id})"
+                            onclick="vendorPanel.deleteProduct('${product.id}')"
                             class="text-red-600 hover:text-red-900"
                         >
                             Eliminar
@@ -202,9 +239,21 @@ class VendorPanel {
         // Llenar formulario de edición
         document.getElementById('edit-product-id').value = product.id;
         document.getElementById('edit-nombre').value = product.nombre;
+        document.getElementById('edit-descripcion').value = product.descripcion || '';
         document.getElementById('edit-precio').value = product.precio;
         document.getElementById('edit-stock').value = product.stock;
         document.getElementById('edit-destacado').checked = product.destacado;
+
+        // Seleccionar categoría
+        if (product.categorias && product.categorias.id) {
+            console.log('🏷️ Seleccionando categoría desde relación:', product.categorias.id, product.categorias.nombre);
+            document.getElementById('edit-categoria').value = product.categorias.id;
+        } else if (product.categoria_id) {
+            console.log('🏷️ Seleccionando categoría desde ID directo:', product.categoria_id);
+            document.getElementById('edit-categoria').value = product.categoria_id;
+        } else {
+            console.warn('⚠️ No se encontró categoría para el producto');
+        }
 
         // Mostrar modal
         document.getElementById('edit-modal').classList.remove('hidden');
@@ -214,34 +263,51 @@ class VendorPanel {
     async handleEditSubmit(e) {
         e.preventDefault();
 
-        const productId = parseInt(document.getElementById('edit-product-id').value);
+        const productId = document.getElementById('edit-product-id').value;
+        const categoriaValue = document.getElementById('edit-categoria').value;
+        
+        // Validar que se seleccionó una categoría
+        if (!categoriaValue) {
+            this.showNotification('Debes seleccionar una categoría', 'error');
+            return;
+        }
+
         const updatedData = {
             nombre: document.getElementById('edit-nombre').value,
+            descripcion: document.getElementById('edit-descripcion').value || '',
             precio: parseFloat(document.getElementById('edit-precio').value),
+            categoria_id: categoriaValue, // Mantener como string (UUID)
             stock: parseInt(document.getElementById('edit-stock').value),
             destacado: document.getElementById('edit-destacado').checked
         };
 
         try {
-            // Actualizar producto en la lista local
-            const productIndex = this.products.findIndex(p => p.id === productId);
-            if (productIndex !== -1) {
-                this.products[productIndex] = { ...this.products[productIndex], ...updatedData };
-                
-                // En una aplicación real, aquí se enviaría al servidor
-                console.log('Producto actualizado:', this.products[productIndex]);
+            console.log('📝 Actualizando producto en Supabase:', productId);
+            console.log('📋 Datos a actualizar:', updatedData);
+
+            const result = await SimpleSupabaseService.updateProduct(productId, updatedData);
+            
+            if (result.success) {
+                // Actualizar producto en la lista local
+                const productIndex = this.products.findIndex(p => p.id === productId);
+                if (productIndex !== -1) {
+                    // Recargar datos desde Supabase para tener datos actualizados
+                    await this.loadData();
+                }
                 
                 // Actualizar UI
-                this.filterProducts();
-                this.updateStats();
+                this.updateUI();
                 this.closeEditModal();
                 
                 // Mostrar confirmación
                 this.showNotification('Producto actualizado exitosamente', 'success');
+                console.log('✅ Producto actualizado exitosamente');
+            } else {
+                throw new Error(result.message);
             }
         } catch (error) {
-            console.error('Error actualizando producto:', error);
-            this.showNotification('Error al actualizar producto', 'error');
+            console.error('❌ Error actualizando producto:', error);
+            this.showNotification('Error al actualizar producto: ' + error.message, 'error');
         }
     }
 
@@ -253,23 +319,29 @@ class VendorPanel {
 
     async confirmDelete() {
         try {
-            // Eliminar de la lista local
-            this.products = this.products.filter(p => p.id !== this.productToDelete);
+            console.log('🗑️ Eliminando producto desde Supabase:', this.productToDelete);
+
+            const result = await SimpleSupabaseService.deleteProduct(this.productToDelete);
             
-            // En una aplicación real, aquí se enviaría al servidor
-            console.log('Producto eliminado:', this.productToDelete);
-            
-            // Actualizar UI
-            this.filterProducts();
-            this.updateStats();
-            this.closeDeleteModal();
-            
-            // Mostrar confirmación
-            this.showNotification('Producto eliminado exitosamente', 'success');
+            if (result.success) {
+                // Eliminar de la lista local
+                this.products = this.products.filter(p => p.id !== this.productToDelete);
+                
+                // Actualizar UI
+                this.filterProducts();
+                this.updateStats();
+                this.closeDeleteModal();
+                
+                // Mostrar confirmación
+                this.showNotification('Producto eliminado exitosamente', 'success');
+                console.log('✅ Producto eliminado exitosamente');
+            } else {
+                throw new Error(result.error);
+            }
             
         } catch (error) {
-            console.error('Error eliminando producto:', error);
-            this.showNotification('Error al eliminar producto', 'error');
+            console.error('❌ Error eliminando producto:', error);
+            this.showNotification('Error al eliminar producto: ' + error.message, 'error');
         }
     }
 

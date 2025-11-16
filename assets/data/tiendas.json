@@ -1,6 +1,54 @@
 [
   {
     "id": 1,
+    "nombre": "Hogar & Deco",
+    "descripcion": "Artículos para el hogar",
+    "logo": "img/stores/casahogar.jpg",
+    "propietario": "Carlos López",
+    "email": "carlos@casahogar.com",
+    "telefono": "3757-345678",
+    "direccion": "Córdoba 789, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-01-15"
+  },
+  {
+    "id": 2,
+    "nombre": "Juguetería Feliz",
+    "descripcion": "Juguetes, didácticos y regalos para todas las edades",
+    "logo": "img/logo/jugueteriafeliz.png",
+    "propietario": "Nicolás Duarte",
+    "email": "hola@jugueteriafeliz.com",
+    "telefono": "+54 376 450-6677",
+    "direccion": "Colón 1140, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-02-20"
+  },
+  {
+    "id": 3,
+    "nombre": "Fashion Store",
+    "descripcion": "Moda urbana, calzado y accesorios.",
+    "logo": "img/logo/fashionstore.png",
+    "propietario": "Valentina Acosta",
+    "email": "hola@fashionstore.com",
+    "telefono": "+54 376 460-7788",
+    "direccion": "Félix de Azara 1567, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-03-10"
+  },
+  {
+    "id": 4,
+    "nombre": "Outdoor Life",
+    "descripcion": "Equipamiento para camping, pesca y aventura",
+    "logo": "img/logo/outdoorlife.png",
+    "propietario": "Diego Pereira",
+    "email": "info@outdoorlife.com.ar",
+    "telefono": "+54 376 445-6789",
+    "direccion": "Ruta 12 Km 7, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-04-15"
+  },
+  {
+    "id": 5,
     "nombre": "TechStore",
     "descripcion": "Electrónicos y tecnología",
     "logo": "img/stores/techstore.jpg",
@@ -9,30 +57,66 @@
     "telefono": "3757-123456",
     "direccion": "Av. Libertad 123, Posadas",
     "activa": true,
-    "fecha_registro": "2024-01-15"
+    "fecha_registro": "2024-05-20"
   },
   {
-    "id": 2,
-    "nombre": "Moda & Estilo",
-    "descripcion": "Ropa y accesorios",
-    "logo": "img/stores/modaestilo.jpg",
-    "propietario": "María González",
-    "email": "maria@modaestilo.com",
-    "telefono": "3757-789012",
-    "direccion": "San Martín 456, Posadas",
+    "id": 6,
+    "nombre": "Perfumería Glamour",
+    "descripcion": "Perfumes importados y cosmética premium",
+    "logo": "img/logo/perfumeriaglamour.png",
+    "propietario": "Carolina Gómez",
+    "email": "ventas@perfumeriaglamour.com",
+    "telefono": "+54 376 440-1122",
+    "direccion": "Junín 980, Posadas",
     "activa": true,
-    "fecha_registro": "2024-02-20"
+    "fecha_registro": "2024-06-25"
   },
   {
-    "id": 3,
-    "nombre": "Casa & Hogar",
-    "descripcion": "Artículos para el hogar",
-    "logo": "img/stores/casahogar.jpg",
-    "propietario": "Carlos López",
-    "email": "carlos@casahogar.com",
-    "telefono": "3757-345678",
+    "id": 7,
+    "nombre": "ElectroMax",
+    "descripcion": "Celulares, tablets y accesorios tecnológicos",
+    "logo": "img/logo/electromax.png",
+    "propietario": "María Castillo",
+    "email": "ventas@electromax.com.ar",
+    "telefono": "+54 376 423-4567",
+    "direccion": "Calle Bolívar 567, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-07-30"
+  },
+  {
+    "id": 8,
+    "nombre": "Librería Saber",
+    "descripcion": "Librería, papelería y útiles escolares.",
+    "logo": "img/logo/libreriasaber.png",
+    "propietario": "Laura Ríos",
+    "email": "contacto@libreriasaber.com",
+    "telefono": "+54 376 435-2244",
     "direccion": "Córdoba 789, Posadas",
     "activa": true,
-    "fecha_registro": "2024-03-10"
+    "fecha_registro": "2024-08-15"
+  },
+  {
+    "id": 9,
+    "nombre": "Bella Piel Cosmética",
+    "descripcion": "Perfumes, maquillaje y productos de belleza",
+    "logo": "img/logo/bellapiel.png",
+    "propietario": "Sofía Benítez",
+    "email": "hola@bellapiel.com.ar",
+    "telefono": "+54 376 434-5678",
+    "direccion": "Av. Costanera 890, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-09-20"
+  },
+  {
+    "id": 10,
+    "nombre": "Deportes Extremos",
+    "descripcion": "Indumentaria deportiva, outdoor y accesorios",
+    "logo": "img/logo/deportesextremos.png",
+    "propietario": "Martín Ferreyra",
+    "email": "contacto@deportesextremos.com",
+    "telefono": "+54 376 430-5566",
+    "direccion": "Av. Uruguay 2450, Posadas",
+    "activa": true,
+    "fecha_registro": "2024-10-25"
   }
 ]

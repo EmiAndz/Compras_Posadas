@@ -27,6 +27,16 @@
                         class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 ml-2">
                     ✅ Verificar Tiendas
                 </button>
+                
+                <button onclick="verificarPoliticasRLS()" 
+                        class="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600 ml-2">
+                    🔧 Debug RLS
+                </button>
+                
+                <button onclick="testConexion()" 
+                        class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 ml-2">
+                    🔍 Test Conexión
+                </button>
             </div>
         </div>
         
@@ -55,73 +65,103 @@
         const tiendasLocales = [
             {
                 nombre: "TechStore Posadas",
-                email: "ventas@techstore.com",
+                descripcion: "Tu tienda de tecnología favorita en Posadas",
+                propietario: "Carlos García",
+                email: "ventas@techstore.com.ar",
                 telefono: "+54 376 4123456",
-                direccion: "Av. Mitre 1234, Posadas",
-                activa: true
+                direccion: "Av. Mitre 1234, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "ElectroMax",
+                descripcion: "Electrodomésticos y tecnología de última generación",
+                propietario: "María Rodríguez",
                 email: "info@electromax.com.ar",
                 telefono: "+54 376 4234567",
-                direccion: "Calle Bolívar 567, Posadas",
-                activa: true
+                direccion: "Calle Bolívar 567, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Bella Piel Cosmética",
-                email: "contacto@bellapiel.com",
+                descripcion: "Cosméticos y productos de belleza premium",
+                propietario: "Ana Silva",
+                email: "contacto@bellapiel.com.ar",
                 telefono: "+54 376 4345678",
-                direccion: "Av. Costanera 890, Posadas",
-                activa: true
+                direccion: "Av. Costanera 890, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Outdoor Life",
-                email: "ventas@outdoorlife.com",
+                descripcion: "Equipamiento para deportes y vida al aire libre",
+                propietario: "Roberto Fernández",
+                email: "ventas@outdoorlife.com.ar",
                 telefono: "+54 376 4456789",
-                direccion: "Villa Cabello, Posadas",
-                activa: true
+                direccion: "Villa Cabello, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Perfumería Glamour",
-                email: "info@glamour.com",
+                descripcion: "Perfumes y fragancias importadas",
+                propietario: "Lucía Martínez",
+                email: "info@glamour.com.ar",
                 telefono: "+54 376 4567890",
-                direccion: "Centro, Posadas",
-                activa: true
+                direccion: "Centro, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Deportes Extremos",
-                email: "ventas@deportesextremos.com",
+                descripcion: "Equipamiento para deportes extremos y aventura",
+                propietario: "Diego López",
+                email: "ventas@deportesextremos.com.ar",
                 telefono: "+54 376 4678901",
-                direccion: "Av. Uruguay, Posadas",
-                activa: true
+                direccion: "Av. Uruguay 456, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Fashion Store",
-                email: "contacto@fashionstore.com",
+                descripcion: "Moda y accesorios para toda la familia",
+                propietario: "Valeria Gómez",
+                email: "contacto@fashionstore.com.ar",
                 telefono: "+54 376 4789012",
-                direccion: "Microcentro, Posadas",
-                activa: true
+                direccion: "Microcentro, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Hogar & Deco",
-                email: "ventas@hogardeco.com",
+                descripcion: "Decoración y artículos para el hogar",
+                propietario: "Patricia Morales",
+                email: "ventas@hogardeco.com.ar",
                 telefono: "+54 376 4890123",
-                direccion: "Barrio Itaembé Miní, Posadas",
-                activa: true
+                direccion: "Barrio Itaembé Miní, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Librería Saber",
-                email: "info@libreriasaber.com",
+                descripcion: "Libros, útiles escolares y material didáctico",
+                propietario: "Jorge Ramírez",
+                email: "info@libreriasaber.com.ar",
                 telefono: "+54 376 4901234",
-                direccion: "Centro, Posadas",
-                activa: true
+                direccion: "Centro, Posadas, Misiones",
+                activa: true,
+                verificada: false
             },
             {
                 nombre: "Juguetería Feliz",
-                email: "ventas@jugueteriafeliz.com",
+                descripcion: "Juguetes educativos y entretenimiento infantil",
+                propietario: "Mónica Castro",
+                email: "ventas@jugueteriafeliz.com.ar",
                 telefono: "+54 376 4012345",
-                direccion: "Villa Sarita, Posadas",
-                activa: true
+                direccion: "Villa Sarita, Posadas, Misiones",
+                activa: true,
+                verificada: false
             }
         ];
 
@@ -137,6 +177,13 @@
         // Verificar tiendas existentes
         async function verificarTiendas() {
             try {
+                addStatus('🔍 Verificando conexión a Supabase...');
+                
+                // Verificar cliente Supabase
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no inicializado');
+                }
+                
                 addStatus('🔍 Verificando tiendas en Supabase...');
                 
                 const result = await window.SimpleSupabaseService.getAllStores();
@@ -163,11 +210,12 @@
                     }
                     
                 } else {
-                    throw new Error('No se pudieron obtener las tiendas');
+                    throw new Error(result.error || 'No se pudieron obtener las tiendas');
                 }
                 
             } catch (error) {
                 addStatus(`❌ Error verificando tiendas: ${error.message}`, true);
+                console.error('Error completo:', error);
             }
         }
 
@@ -214,49 +262,202 @@
             try {
                 addStatus('🚀 Iniciando migración de tiendas...');
                 
+                // Verificar cliente Supabase
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no inicializado. Recarga la página.');
+                }
+                
+                // Debug: Verificar conexión
+                addStatus('🔍 Verificando conexión...');
+                const { data: testData, error: testError } = await window.supabaseClient
+                    .from('tiendas')
+                    .select('count(*)')
+                    .limit(1);
+                    
+                if (testError) {
+                    console.error('Error de conexión:', testError);
+                    addStatus(`❌ Error de conexión: ${testError.message}`, true);
+                    return;
+                }
+                
+                addStatus('✅ Conexión a Supabase OK');
+                
                 // Obtener tiendas existentes
-                const existingResult = await window.SimpleSupabaseService.getAllStores();
-                const existingNames = existingResult.success ? 
-                    existingResult.data.map(t => t.nombre.toLowerCase()) : [];
+                let existingNames = [];
+                try {
+                    const existingResult = await window.SimpleSupabaseService.getAllStores();
+                    existingNames = existingResult.success ? 
+                        existingResult.data.map(t => t.nombre.toLowerCase()) : [];
+                    addStatus(`📊 ${existingNames.length} tiendas ya existen en la BD`);
+                } catch (error) {
+                    addStatus('⚠️ No se pudieron obtener tiendas existentes, continuando...');
+                    console.warn('Error obteniendo tiendas existentes:', error);
+                }
                 
                 let migradas = 0;
                 let saltadas = 0;
+                let errores = 0;
                 
-                for (const tienda of tiendasLocales) {
-                    if (existingNames.includes(tienda.nombre.toLowerCase())) {
-                        addStatus(`⏭️ Saltando ${tienda.nombre} (ya existe)`);
-                        saltadas++;
-                        continue;
-                    }
-                    
+                for (const [index, tienda] of tiendasLocales.entries()) {
                     try {
-                        const result = await window.SimpleSupabaseService.createStore(tienda);
+                        addStatus(`📝 Procesando ${index + 1}/${tiendasLocales.length}: ${tienda.nombre}`);
+                        
+                        if (existingNames.includes(tienda.nombre.toLowerCase())) {
+                            addStatus(`⏭️ Saltando ${tienda.nombre} (ya existe)`);
+                            saltadas++;
+                            continue;
+                        }
+                        
+                        // Preparar datos con propietario requerido
+                        const datosCompletos = {
+                            ...tienda,
+                            propietario: tienda.propietario || 'Admin Sistema', // Campo requerido
+                            descripcion: tienda.descripcion || `Tienda ${tienda.nombre}`,
+                            verificada: false
+                        };
+                        
+                        console.log('Datos a insertar:', datosCompletos);
+                        
+                        const result = await window.SimpleSupabaseService.createStore(datosCompletos);
                         
                         if (result.success) {
                             addStatus(`✅ Migrada: ${tienda.nombre}`);
                             migradas++;
                         } else {
                             addStatus(`❌ Error migrando ${tienda.nombre}: ${result.error}`, true);
+                            console.error(`Error detallado para ${tienda.nombre}:`, result);
+                            errores++;
                         }
                         
-                        // Pausa pequeña entre inserciones
-                        await new Promise(resolve => setTimeout(resolve, 200));
+                        // Pausa entre inserciones
+                        await new Promise(resolve => setTimeout(resolve, 500));
                         
                     } catch (error) {
-                        addStatus(`❌ Error con ${tienda.nombre}: ${error.message}`, true);
+                        addStatus(`❌ Excepción con ${tienda.nombre}: ${error.message}`, true);
+                        console.error(`Excepción para ${tienda.nombre}:`, error);
+                        errores++;
                     }
                 }
                 
-                addStatus(`🎉 Migración completada: ${migradas} migradas, ${saltadas} saltadas`);
+                addStatus(`🎉 Migración completada: ${migradas} migradas, ${saltadas} saltadas, ${errores} errores`);
                 
-                // Verificar resultado final
-                setTimeout(verificarTiendas, 1000);
+                if (migradas > 0) {
+                    addStatus('🔄 Actualizando lista...');
+                    setTimeout(verificarTiendas, 2000);
+                }
                 
             } catch (error) {
-                addStatus(`❌ Error en migración: ${error.message}`, true);
+                addStatus(`❌ Error general en migración: ${error.message}`, true);
+                console.error('Error completo en migración:', error);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Iniciar Migración';
+            }
+        }
+
+        // Test de conexión
+        async function testConexion() {
+            try {
+                addStatus('🔍 Probando conexión a Supabase...');
+                
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no disponible');
+                }
+                
+                // Test 1: Ping básico
+                const { data: ping, error: pingError } = await window.supabaseClient
+                    .from('categorias')
+                    .select('count(*)')
+                    .limit(1);
+                    
+                if (pingError) {
+                    throw new Error(`Ping falló: ${pingError.message}`);
+                }
+                addStatus('✅ Ping a BD exitoso');
+                
+                // Test 2: Verificar tabla tiendas
+                const { data: tiendas, error: tiendasError } = await window.supabaseClient
+                    .from('tiendas')
+                    .select('count(*)')
+                    .limit(1);
+                    
+                if (tiendasError) {
+                    addStatus(`❌ Error accediendo tabla tiendas: ${tiendasError.message}`, true);
+                    addStatus(`Código: ${tiendasError.code}, Detalles: ${tiendasError.details}`, true);
+                } else {
+                    addStatus('✅ Tabla tiendas accesible');
+                }
+                
+                // Test 3: Verificar permisos de inserción
+                try {
+                    const { data: testInsert, error: insertError } = await window.supabaseClient
+                        .from('tiendas')
+                        .insert([{
+                            nombre: 'TEST_DELETE_ME',
+                            propietario: 'TEST',
+                            email: `test_${Date.now()}@test.com`,
+                            activa: false
+                        }])
+                        .select();
+                        
+                    if (insertError) {
+                        addStatus(`❌ Error permisos INSERT: ${insertError.message}`, true);
+                        if (insertError.code === '42501') {
+                            addStatus('💡 Posible problema de políticas RLS', true);
+                        }
+                    } else {
+                        addStatus('✅ Permisos INSERT OK');
+                        // Limpiar el registro de prueba
+                        await window.supabaseClient
+                            .from('tiendas')
+                            .delete()
+                            .eq('id', testInsert[0].id);
+                        addStatus('🧹 Registro de prueba eliminado');
+                    }
+                } catch (insertErr) {
+                    addStatus(`❌ Excepción en test INSERT: ${insertErr.message}`, true);
+                }
+                
+            } catch (error) {
+                addStatus(`❌ Error en test de conexión: ${error.message}`, true);
+                console.error('Error completo:', error);
+            }
+        }
+        
+        // Verificar políticas RLS
+        async function verificarPoliticasRLS() {
+            try {
+                addStatus('🔍 Verificando políticas RLS...');
+                
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no disponible');
+                }
+                
+                // Query para verificar políticas existentes
+                const { data: politicas, error } = await window.supabaseClient
+                    .rpc('get_table_policies', { table_name: 'tiendas' })
+                    .select('*');
+                    
+                if (error) {
+                    addStatus('⚠️ No se pueden consultar políticas RLS directamente', false);
+                    addStatus('💡 Esto es normal si no tienes permisos de admin', false);
+                } else {
+                    addStatus(`📋 Encontradas ${politicas.length} políticas para tabla tiendas`);
+                    politicas.forEach(p => {
+                        addStatus(`   - ${p.policyname}: ${p.cmd}`);
+                    });
+                }
+                
+                // Información sobre el problema común
+                addStatus('🛠️ SOLUCIÓN RECOMENDADA:', false);
+                addStatus('1. Ve a tu panel de Supabase', false);
+                addStatus('2. Authentication > Policies', false);
+                addStatus('3. Tabla "tiendas" > Crear política', false);
+                addStatus('4. Permitir INSERT para todos los roles', false);
+                addStatus('5. O ejecuta el script FIX_RLS_TIENDAS.sql', false);
+                
+            } catch (error) {
+                addStatus(`❌ Error verificando RLS: ${error.message}`, true);
             }
         }
 
@@ -265,6 +466,7 @@
             setTimeout(() => {
                 addStatus('📋 Sistema listo para migración');
                 addStatus(`📦 ${tiendasLocales.length} tiendas locales disponibles para migrar`);
+                addStatus('💡 Si hay errores, usa "Debug RLS" y "Test Conexión"');
             }, 1000);
         });
     </script>

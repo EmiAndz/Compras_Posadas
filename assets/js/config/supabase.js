@@ -82,8 +82,18 @@ function handleSupabaseError(error, context = '') {
   return message
 }
 
+// Función para inicializar Supabase manualmente
+function initializeSupabaseManually() {
+  const client = initializeSupabase();
+  window.supabaseClient = client;
+  console.log('🔧 Supabase inicializado manualmente');
+  return client;
+}
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🌟 DOM cargado, inicializando Supabase...');
+  
   // Inicializar Supabase
   const client = initializeSupabase();
   
@@ -91,6 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
   window.supabaseClient = client;
   window.testSupabaseConnection = testSupabaseConnection;
   window.handleSupabaseError = handleSupabaseError;
+  window.initializeSupabaseManually = initializeSupabaseManually;
+  
+  if (client) {
+    console.log('✅ Cliente Supabase exportado globalmente');
+  } else {
+    console.error('❌ Error exportando cliente Supabase');
+  }
   
   // Verificar conexión en desarrollo
   if (client && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
