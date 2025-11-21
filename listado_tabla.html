@@ -3,51 +3,280 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Listado de Productos</title>
+  <title>Resultados de Búsqueda - Compras Posadas</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <style>
+    .search-results {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .search-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .search-query {
+      color: #2fa15a;
+      font-weight: 600;
+    }
+    
     .tabla-productos {
-      width: 90%;
-      margin: 32px auto;
+      width: 100%;
       border-collapse: collapse;
       background: #fff;
       box-shadow: 0 2px 12px rgba(44,164,93,0.07);
       border-radius: 12px;
       overflow: hidden;
+      margin-bottom: 20px;
     }
+    
     .tabla-productos th, .tabla-productos td {
       padding: 14px 18px;
       text-align: left;
       border-bottom: 1px solid #e6e6e6;
     }
+    
     .tabla-productos th {
       background: #2fa15a;
       color: #fff;
       font-size: 1.08rem;
       font-weight: 600;
     }
+    
     .tabla-productos tr:last-child td {
       border-bottom: none;
     }
+    
     .tabla-productos tr:hover td {
       background: #f6fff9;
+    }
+    
+    .product-name {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      color: #2fa15a;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #2fa15a;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .tabla-productos th, .tabla-productos td {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .search-results {
+        padding: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center; margin-top:32px;">Listado de Productos</h1>
-  <table class="tabla-productos">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Producto</th>
-        <th>Categoría</th>
-        <th>Precio</th>
-        <th>Tienda</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
+  <div class="search-results">
+    <a href="index.html" class="back-link">← Volver al inicio</a>
+    
+    <div class="search-header">
+      <h1 id="searchTitle">Buscando...</h1>
+      <p id="searchSubtitle">Cargando resultados...</p>
+    </div>
+    
+    <div id="loadingDiv" class="loading">
+      <p>Buscando productos...</p>
+    </div>
+    
+    <div id="resultsContainer" style="display: none;">
+      <table class="tabla-productos">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Tienda</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="noResultsDiv" class="no-results" style="display: none;">
+      <h2>No se encontraron productos</h2>
+      <p>No hay productos que coincidan con tu búsqueda.</p>
+      <p>Intenta con otros términos de búsqueda.</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config/supabase.js"></script>
+  
+  <script>
+    class SearchResults {
+      constructor() {
+        this.query = new URLSearchParams(window.location.search).get('q') || '';
+        this.init();
+      }
+      
+      async init() {
+        if (!this.query) {
+          this.showNoQuery();
+          return;
+        }
+        
+        this.updateTitle();
+        await this.searchProducts();
+      }
+      
+      updateTitle() {
+        const title = document.getElementById('searchTitle');
+        const subtitle = document.getElementById('searchSubtitle');
+        
+        title.textContent = `Resultados para: "${this.query}"`;
+        subtitle.textContent = 'Buscando en todos los productos...';
+        document.title = `"${this.query}" - Resultados de Búsqueda - Compras Posadas`;
+      }
+      
+      async searchProducts() {
+        try {
+          // Esperar a que Supabase esté disponible
+          await this.waitForSupabase();
+          
+          const { data, error } = await window.supabaseClient
+            .from('productos')
+            .select(`
+              id,
+              nombre,
+              descripcion,
+              precio,
+              stock,
+              categorias:categoria_id (nombre),
+              tiendas:tienda_id (nombre)
+            `)
+            .or(`nombre.ilike.%${this.query}%,descripcion.ilike.%${this.query}%`)
+            .eq('activo', true)
+            .order('nombre');
+          
+          if (error) {
+            throw error;
+          }
+          
+          this.displayResults(data || []);
+          
+        } catch (error) {
+          console.error('Error en búsqueda:', error);
+          this.showError();
+        }
+      }
+      
+      async waitForSupabase() {
+        return new Promise((resolve) => {
+          const checkSupabase = () => {
+            if (window.supabaseClient) {
+              resolve();
+            } else {
+              setTimeout(checkSupabase, 100);
+            }
+          };
+          checkSupabase();
+        });
+      }
+      
+      displayResults(products) {
+        const loadingDiv = document.getElementById('loadingDiv');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const noResultsDiv = document.getElementById('noResultsDiv');
+        const subtitle = document.getElementById('searchSubtitle');
+        const resultsBody = document.getElementById('resultsBody');
+        
+        loadingDiv.style.display = 'none';
+        
+        if (products.length === 0) {
+          noResultsDiv.style.display = 'block';
+          subtitle.textContent = 'No se encontraron productos.';
+          return;
+        }
+        
+        subtitle.textContent = `Se encontraron ${products.length} producto${products.length === 1 ? '' : 's'}.`;
+        resultsContainer.style.display = 'block';
+        
+        resultsBody.innerHTML = products.map(product => `
+          <tr onclick="window.location.href='producto.html?id=${product.id}'" style="cursor: pointer;">
+            <td class="product-name">${product.nombre}</td>
+            <td>${product.categorias?.nombre || 'Sin categoría'}</td>
+            <td class="product-price">$${this.formatPrice(product.precio)}</td>
+            <td>${product.tiendas?.nombre || 'Sin tienda'}</td>
+            <td>${product.stock || 0}</td>
+          </tr>
+        `).join('');
+      }
+      
+      formatPrice(price) {
+        if (!price) return 'Consultar';
+        return new Intl.NumberFormat('es-AR').format(price);
+      }
+      
+      showNoQuery() {
+        const loadingDiv = document.getElementById('loadingDiv');
+        const title = document.getElementById('searchTitle');
+        const subtitle = document.getElementById('searchSubtitle');
+        
+        loadingDiv.style.display = 'none';
+        title.textContent = 'Búsqueda sin parámetros';
+        subtitle.textContent = 'No se especificó qué buscar.';
+        
+        // Redirigir al inicio después de 3 segundos
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 3000);
+      }
+      
+      showError() {
+        const loadingDiv = document.getElementById('loadingDiv');
+        const title = document.getElementById('searchTitle');
+        const subtitle = document.getElementById('searchSubtitle');
+        
+        loadingDiv.style.display = 'none';
+        title.textContent = 'Error en la búsqueda';
+        subtitle.textContent = 'Hubo un problema al buscar productos. Intenta de nuevo.';
+      }
+    }
+    
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      new SearchResults();
+    });
+  </script>
+</body>
+</html>
         <td>001</td>
         <td>Samsung S25</td>
         <td>Tecnología</td>

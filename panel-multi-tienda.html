@@ -252,7 +252,7 @@
                         <div class="border rounded-lg p-4">
                             ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-32 object-cover rounded mb-2">` : '<div class="w-full h-32 bg-gray-200 rounded mb-2 flex items-center justify-center"><span class="text-gray-400">Sin imagen</span></div>'}
                             <h4 class="font-semibold">${producto.nombre}</h4>
-                            <p class="text-green-600 font-bold">$${producto.precio.toLocaleString()}</p>
+                            <p class="text-green-600 font-bold">${new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(producto.precio)}</p>
                             <p class="text-sm text-gray-600">Stock: ${producto.stock}</p>
                             <div class="text-xs text-gray-500 mt-2">
                                 ID: ${producto.id.substring(0, 8)}...
@@ -292,7 +292,7 @@
                                     ${productos.map(p => `
                                         <div class="border rounded p-3">
                                             <div class="font-medium text-sm">${p.nombre}</div>
-                                            <div class="text-green-600 font-bold">$${p.precio.toLocaleString()}</div>
+                                            <div class="text-green-600 font-bold">${new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(p.precio)}</div>
                                             <div class="text-xs text-gray-500">Stock: ${p.stock}</div>
                                         </div>
                                     `).join('')}

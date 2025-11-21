@@ -15,18 +15,37 @@
         <span class="logo-icon"></span>
         <span class="brand__name"><strong>Compras</strong> Posadas</span>
       </a>
-      <form class="search" role="search" aria-label="Buscar productos">
-        <input 
-          type="search" 
-          placeholder="Buscar por producto, categoría, tienda" 
-          aria-label="Buscar producto" 
-        />
-        <button type="submit" class="btn-icon" aria-label="Buscar">
-          <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
-            <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
+      <form class="search" role="search" aria-label="Buscar productos" id="searchForm">
+        <div class="search__container">
+          <div class="search__input-wrapper">
+            <input 
+              type="search" 
+              placeholder="Buscar por producto, categoría, tienda" 
+              aria-label="Buscar producto"
+              id="searchInput"
+              autocomplete="off"
+            />
+            <button type="button" class="search__clear-btn" id="clearSearchBtn" aria-label="Limpiar búsqueda" style="display: none;">
+              <span>×</span>
+            </button>
+            <button type="submit" class="btn-icon" aria-label="Buscar">
+              <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+                <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Dropdown de sugerencias debajo del input -->
+          <div class="search__dropdown" id="searchDropdown" style="display: none;">
+            <div class="search__suggestion-item" id="searchSuggestion">
+              <span class="search__suggestion-text" id="suggestionText"></span>
+              <div class="search__loading" id="searchLoading" style="display: none;">
+                <div class="search__spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
       <nav class="actions">
         <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
@@ -270,6 +289,13 @@
     </section>
   </aside>
 
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <!-- Scripts de la aplicación -->
+  <script src="assets/js/config/supabase.js"></script>
+  <script src="assets/js/global-search.js"></script>
+  <script src="assets/js/services/storeService.js"></script>
   <script src="assets/js/script.js"></script>
   <script src="assets/js/tiendas.js"></script>
 </body>

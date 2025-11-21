@@ -27,6 +27,9 @@ function initializeSupabase() {
       }
     });
 
+    // Hacer disponible globalmente
+    window.supabaseClient = supabase;
+
     console.log('✅ Cliente Supabase inicializado correctamente');
     return supabase;
 
@@ -34,6 +37,18 @@ function initializeSupabase() {
     console.error('❌ Error inicializando Supabase:', error);
     return null;
   }
+}
+
+// Inicializar automáticamente cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+  initializeSupabase();
+});
+
+// También inicializar inmediatamente si el DOM ya está listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeSupabase);
+} else {
+  initializeSupabase();
 }
 
 // Verificar conexión

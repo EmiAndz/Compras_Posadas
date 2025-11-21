@@ -3,109 +3,895 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Listado de Productos</title>
+  <title>Catálogo de Productos - Compras Posadas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/styles.css" />
+  
+  <!-- AOS (Animate On Scroll) Plugin -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <style>
     .productos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 28px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
       max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 16px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    .producto-box {
+    .producto-card {
       background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 2px 12px rgba(44,164,93,0.09);
-      padding: 22px 18px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      cursor: pointer;
+    }
+    .producto-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      border-color: #059669;
+      text-decoration: none;
+      color: inherit;
+    }
+    .producto-card:active {
+      transform: translateY(-1px);
+    }
+    .producto-imagen {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #f9fafb;
+      position: relative;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      transition: box-shadow 0.2s, transform 0.2s;
-      border: 1px solid #e6f6ee;
+      align-items: center;
+      justify-content: center;
     }
-    .producto-box:hover {
-      box-shadow: 0 8px 24px rgba(44,164,93,0.18);
-      transform: translateY(-4px) scale(1.03);
-      border-color: #2fa15a33;
+    .producto-imagen img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 10px;
     }
-    .producto-nombre {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #228b49;
+    .badge-destacado {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #047857;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #10b981;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .fav-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    
+    .fav-btn:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .fav-btn.active {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid #ef4444;
+    }
+    
+    .fav-icon {
+      font-size: 18px;
+      color: #6b7280;
+      transition: color 0.2s ease;
+    }
+    
+    .fav-btn.active .fav-icon {
+      color: #ef4444;
+    }
+    .producto-info {
+      padding: 16px;
     }
     .producto-categoria {
-      font-size: 0.98rem;
-      color: #2fa15a;
-      margin-bottom: 6px;
+      font-size: 0.75rem;
+      color: #6b7280;
       font-weight: 500;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .producto-nombre {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.6rem;
     }
     .producto-precio {
-      font-size: 1.08rem;
-      font-weight: 600;
-      color: #155d2d;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #059669;
+      margin-bottom: 8px;
+    }
+    .producto-detalles {
       margin-bottom: 6px;
     }
     .producto-tienda {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 2px;
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-weight: 500;
+      margin-bottom: 4px;
     }
-    .producto-id {
-      font-size: 0.85rem;
-      color: #aaa;
-      margin-bottom: 2px;
+    .producto-stock {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .stock-disponible {
+      color: #059669;
+    }
+    .stock-agotado {
+      color: #dc2626;
+    }
+    .producto-codigo {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    .header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px 30px;
+      text-align: center;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .header h1 {
+      color: #047857;
+      margin-bottom: 12px;
+      font-size: 1.875rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    .contador {
+      color: #9ca3af;
+      font-size: 0.875rem;
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+    .filtros {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+    }
+    .filtros select, .filtros button {
+      padding: 10px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      color: #374151;
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 140px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .filtros select:hover, .filtros select:focus {
+      border-color: #059669;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+      transform: translateY(-1px);
+    }
+    .filtros button {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      font-weight: 500;
+      min-width: auto;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+    }
+    .filtros button:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+      transform: translateY(-2px);
+    }
+    .filtros button:before {
+      color: white;
+    }
+    .loading, .error, .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .error {
+      color: #dc2626;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2fa15a;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @media (max-width: 768px) {
+      .productos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        padding: 16px;
+      }
+      .filtros {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+      .filtros select, .filtros button {
+        min-width: 100px;
+        font-size: 0.8rem;
+      }
+      .producto-imagen {
+        height: 140px;
+      }
+      .producto-info {
+        padding: 12px;
+      }
+      .producto-nombre {
+        font-size: 0.85rem;
+      }
+      .producto-precio {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Barra superior -->
-  <header class="topbar">
+  <!-- Topbar -->
+  <header class="topbar" data-aos="fade-down" data-aos-duration="800">
     <div class="topbar__wrap">
-      <a class="brand" href="#">Compras Posadas</a>
-      <!-- Puedes agregar aquí el buscador y los botones si lo deseas -->
+      <a class="brand" href="index.html" data-aos="fade-right" data-aos-delay="200">
+        <span class="logo-icon"></span>
+        <span class="brand__name"><strong>Compras</strong> Posadas</span>
+      </a>
+      <form class="search" role="search" aria-label="Buscar productos" data-aos="fade-up" data-aos-delay="300" id="searchForm">
+        <div class="search__container">
+          <div class="search__input-wrapper">
+            <input 
+              type="search" 
+              placeholder="Buscar por producto, categoría, tienda" 
+              aria-label="Buscar producto"
+              id="searchInput"
+              autocomplete="off"
+            />
+            <button type="button" class="search__clear-btn" id="clearSearchBtn" aria-label="Limpiar búsqueda" style="display: none;">
+              <span>×</span>
+            </button>
+            <button type="submit" class="btn-icon" aria-label="Buscar">
+              <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+                <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Dropdown de sugerencias debajo del input -->
+          <div class="search__dropdown" id="searchDropdown" style="display: none;">
+            <div class="search__suggestion-item" id="searchSuggestion">
+              <span class="search__suggestion-text" id="suggestionText"></span>
+              <div class="search__loading" id="searchLoading" style="display: none;">
+                <div class="search__spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <nav class="actions" data-aos="fade-left" data-aos-delay="400">
+        <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
+          <span class="icon-heart" aria-hidden="true">♥</span>
+          Lista deseos
+          <span id="wlCount" class="badge">0</span>
+        </button>
+        <button type="button" class="action-btn" id="btnLogin">Iniciar sesión</button>
+      </nav>
     </div>
   </header>
 
-  <h1 style="text-align:center; margin-top:32px;">Listado de Productos</h1>
-  <section class="productos-grid">
-    <div class="producto-box">
-      <div class="producto-nombre">Samsung S25</div>
-      <div class="producto-categoria">Tecnología</div>
-      <div class="producto-precio">$520.000</div>
-      <div class="producto-tienda">Samsung Store</div>
-      <div class="producto-id">ID: 001</div>
+  <!-- Barra de navegación superior (Desktop) -->
+  <nav class="desktop-nav" aria-label="Navegación principal desktop" data-aos="fade-down" data-aos-delay="600">
+    <div class="desktop-nav__wrap">
+      <a href="index.html" class="desktop-nav__item" data-aos="zoom-in" data-aos-delay="700">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      
+      <a href="listado_box.html" class="desktop-nav__item active" data-aos="zoom-in" data-aos-delay="750">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M19 7H5C3.89543 7 3 7.89543 3 9V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V9C21 7.89543 20.1046 7 19 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 3H8C6.89543 3 6 3.89543 6 5V7H18V5C18 3.89543 17.1046 3 16 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Catálogo</span>
+      </a>
+      
+      <a href="tiendas.html" class="desktop-nav__item" data-aos="zoom-in" data-aos-delay="800">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 20C21 18.9391 20.5786 17.9217 19.8284 17.1716C19.0783 16.4214 18.0609 16 17 16H9C7.93913 16 6.92172 16.4214 6.17157 17.1716C5.42143 17.9217 5 18.9391 5 20M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 21V19C19 18.1974 18.7205 17.4204 18.2207 16.8056C17.7209 16.1908 17.0332 15.7759 16.26 15.64M15 3.13C15.7739 3.26531 16.4622 3.68167 16.9629 4.29790C17.4636 4.91413 17.7436 5.69240 17.7436 6.49635C17.7436 7.30030 17.4636 8.07857 16.9629 8.69480C16.4622 9.31103 15.7739 9.72739 15 9.86270" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Tiendas</span>
+      </a>
+      
+      <a href="ubicaciones.html" class="desktop-nav__item" data-aos="zoom-in" data-aos-delay="850">
+        <svg class="desktop-nav__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Ubicaciones</span>
+      </a>
     </div>
-    <div class="producto-box">
-      <div class="producto-nombre">Perfume Yves Saint Laurent</div>
-      <div class="producto-categoria">Perfumería</div>
-      <div class="producto-precio">$65.000</div>
-      <div class="producto-tienda">Fragancias Posadas</div>
-      <div class="producto-id">ID: 002</div>
+  </nav>
+
+  <!-- Botón de menú móvil -->
+  <button class="mobile-menu-btn" aria-label="Abrir menú de categorías" aria-expanded="false" data-aos="fade-up" data-aos-delay="500">
+    <span class="mobile-menu-btn__icon">☰</span>
+    <span class="mobile-menu-btn__text">Categorías</span>
+  </button>
+
+  <div class="container layout">
+    <!-- Sidebar de categorías -->
+    <aside class="sidebar" id="sidebar" data-aos="slide-right" data-aos-duration="800">
+      <div class="sidebar__header" data-aos="fade-down" data-aos-delay="200">
+        <h2 class="sidebar__title">Categorías</h2>
+        <button class="sidebar__close" aria-label="Cerrar menú">✕</button>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="listado_box.html?categoria=celulares" data-aos="fade-right" data-aos-delay="300"><span>📱</span> Celulares</a>
+        <a href="listado_box.html?categoria=electronica" data-aos="fade-right" data-aos-delay="350"><span>🖥️</span> Electrónica</a>
+        <a href="listado_box.html?categoria=cosmetica" data-aos="fade-right" data-aos-delay="400"><span>💄</span> Cosmetica</a>
+        <a href="listado_box.html?categoria=informatica" data-aos="fade-right" data-aos-delay="450"><span>💻</span> Informática</a>
+        <a href="listado_box.html?categoria=camping" data-aos="fade-right" data-aos-delay="500"><span>🏕️</span> Camping</a>
+        <a href="listado_box.html?categoria=apple" data-aos="fade-right" data-aos-delay="550"><span>🍏</span> Apple</a>
+        <a href="listado_box.html?categoria=indumentaria" data-aos="fade-right" data-aos-delay="600"><span>👕</span> Indumentaria</a>
+        <a href="listado_box.html?categoria=calzado" data-aos="fade-right" data-aos-delay="650"><span>👟</span> Calzado</a>
+        <a href="listado_box.html?categoria=ofertas" data-aos="fade-right" data-aos-delay="700"><span>🏷️</span> Ofertas y descuentos</a>
+        <a href="listado_box.html?categoria=todas" data-aos="fade-right" data-aos-delay="750"><span>🗂️</span> Todas las categorías</a>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+      <!-- Header del catálogo -->
+      <div class="header" data-aos="fade-up" data-aos-delay="300">
+        <h1>Catálogo de Productos</h1>
+        <p class="contador" id="contador">Cargando productos desde Supabase...</p>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros" data-aos="fade-up" data-aos-delay="400">
+        <select id="filtro-categoria">
+          <option value="todos">Todas las categorías</option>
+        </select>
+        <select id="filtro-tienda">
+          <option value="todos">Todas las tiendas</option>
+        </select>
+        <select id="ordenar-por">
+          <option value="relevantes">Más relevantes</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="nombre">Nombre A-Z</option>
+          <option value="recientes">Más recientes</option>
+        </select>
+        <button onclick="limpiarFiltros()" title="Limpiar filtros">↻ Limpiar</button>
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="productos-grid" id="productos-container" data-aos="fade-up" data-aos-delay="500">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando productos desde Supabase...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de login -->
+  <div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="loginTitle">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__content">
+      <button class="modal__close" type="button" aria-label="Cerrar modal" data-close>×</button>
+      <h2 id="loginTitle" class="modal__title">Iniciar sesión</h2>
+      <p class="modal__subtitle">Accede a tu panel de vendedor</p>
+      <form id="loginForm" class="modal__form" novalidate>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email">
+          <span class="form-error" id="emailError" role="alert"></span>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+          <span class="form-error" id="passwordError" role="alert"></span>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginSubmit">Iniciar sesión</button>
+        <div class="modal__oauth">
+          <button type="button" class="btn btn-ghost" id="loginGoogle">Continuar con Google</button>
+          <small class="hint">* Google se activará cuando conectemos Supabase</small>
+        </div>
+        <p id="loginError" class="form-error" role="alert" hidden></p>
+      </form>
     </div>
-    <div class="producto-box">
-      <div class="producto-nombre">Notebook IdeaPad 3</div>
-      <div class="producto-categoria">Tecnología</div>
-      <div class="producto-precio">$420.000</div>
-      <div class="producto-tienda">TecnoShop Posadas</div>
-      <div class="producto-id">ID: 003</div>
-    </div>
-    <div class="producto-box">
-      <div class="producto-nombre">Auriculares JBL</div>
-      <div class="producto-categoria">Audio</div>
-      <div class="producto-precio">$32.000</div>
-      <div class="producto-tienda">ElectroShop</div>
-      <div class="producto-id">ID: 004</div>
-    </div>
-    <div class="producto-box">
-      <div class="producto-nombre">Televisor Samsung 23"</div>
-      <div class="producto-categoria">Electrónica</div>
-      <div class="producto-precio">$110.000</div>
-      <div class="producto-tienda">Samsung Store</div>
-      <div class="producto-id">ID: 005</div>
-    </div>
-  </section>
+  </div>
+
+  <!-- Lista de deseos (Drawer) -->
+  <aside id="wishlistDrawer" class="wl-drawer" aria-hidden="true" aria-label="Lista de deseos">
+    <div class="wl-backdrop" data-close></div>
+    <section class="wl-panel">
+      <header class="wl-header">
+        <h3>Lista de deseos</h3>
+        <button class="wl-close" type="button" aria-label="Cerrar" data-close>×</button>
+      </header>
+      <div id="wlList" class="wl-list" role="list"></div>
+      <footer class="wl-footer">
+        <button id="wlClear" class="btn btn-ghost">Vaciar lista</button>
+      </footer>
+    </section>
+  </aside>
+
+  <script src="assets/js/script.js"></script>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config/supabase.js"></script>
+  <script src="assets/js/global-search.js"></script>
+  <script src="assets/js/services/simpleServices.js"></script>
+
+  <script>
+    // Cargar productos desde Supabase - Misma lógica que index.html
+    let todosProductos = [];
+    let productosFiltrados = [];
+    let categoriaActual = 'todos';
+    let tiendaActual = 'todos';
+    let ordenActual = 'relevantes';
+
+    // Mapeo de categorías de URL a nombres de categorías en la base de datos
+    const categoriaMap = {
+      'celulares': ['Celulares', 'Electronica', 'Electrónica'],
+      'electronica': ['Electrónica', 'Electronica', 'Celulares'], 
+      'cosmetica': ['Belleza', 'Cosmetica', 'Cosmética'], // Múltiples opciones posibles
+      'informatica': ['Informática', 'Informatica'],
+      'camping': ['Camping'],
+      'apple': ['Apple'],
+      'indumentaria': ['Indumentaria', 'Moda'],
+      'calzado': ['Calzado'],
+      'ofertas': ['Ofertas y descuentos'],
+      'todas': 'todos'
+    };
+
+    // Función para obtener categoría de la URL
+    function getCategoriaFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      const categoriaParam = params.get('categoria');
+      
+      if (!categoriaParam || categoriaParam === 'todas') {
+        return 'todos';
+      }
+      
+      // Devolver las categorías mapeadas o la original si no está en el mapa
+      const mapped = categoriaMap[categoriaParam];
+      if (Array.isArray(mapped)) {
+        return mapped; // Devolver array para búsqueda múltiple
+      }
+      return mapped || categoriaParam;
+    }
+
+    function showErrorMessage(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-md z-50';
+      errorDiv.textContent = message;
+      document.body.appendChild(errorDiv);
+      
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 5000);
+    }
+
+    function mostrarError(mensaje) {
+      const container = document.getElementById('productos-container');
+      container.innerHTML = `
+        <div class="error">
+          <h3>❌ Error al cargar productos</h3>
+          <p>${mensaje}</p>
+          <button onclick="initializeProducts()" style="background: #2fa15a; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;">
+            🔄 Reintentar
+          </button>
+        </div>
+      `;
+      document.getElementById('contador').textContent = 'Error al cargar productos';
+    }
+
+    function showLoading() {
+      const container = document.getElementById('productos-container');
+      if (container) {
+        container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando productos...</p></div>';
+      }
+    }
+
+    function mostrarVacio() {
+      const container = document.getElementById('productos-container');
+      container.innerHTML = `
+        <div class="empty">
+          <h3>📦 No hay productos disponibles</h3>
+          <p>Las tiendas aún no han cargado productos o no coinciden con los filtros aplicados.</p>
+          <button onclick="initializeProducts()" style="background: #2fa15a; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;">
+            🔄 Recargar
+          </button>
+        </div>
+      `;
+    }
+
+    // Función para formatear precios en pesos argentinos con formato es-AR
+    const formatARS = (precio) => {
+      if (!precio || precio === 0) return 'Consultar precio';
+      const valor = Number(precio); // por si Supabase lo manda como string
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(valor);
+    };
+
+    function formatearPrecio(precio) {
+      return formatARS(precio);
+    }
+
+    function renderProductos(productos) {
+      const container = document.getElementById('productos-container');
+      const contador = document.getElementById('contador');
+      
+      if (!productos || productos.length === 0) {
+        mostrarVacio();
+        contador.textContent = 'No hay productos que coincidan con los filtros';
+        return;
+      }
+
+      const html = productos.map(producto => {
+        const categoria = producto.categoria || 'Sin categoría';
+        const tienda = producto.tienda || 'Tienda';
+        const precio = formatearPrecio(producto.precio);
+        const imagen = producto.img || 'img/products/default.jpg';
+        const codigo = producto.codigo || 'N/A';
+        const stock = producto.stock || 0;
+        const stockClass = stock > 0 ? 'stock-disponible' : 'stock-agotado';
+        const stockText = stock > 0 ? `Stock: ${stock}` : 'Agotado';
+
+        console.log('🖼️ Debug imagen:', {
+          nombre: producto.nombre,
+          imgOriginal: producto.img,
+          imagenFinal: imagen,
+          productoCompleto: producto
+        });
+
+        return `
+          <a href="producto.html?id=${producto.id}" class="producto-card block">
+            <div class="producto-imagen">
+              <button class="fav-btn" data-product-id="${producto.id}" title="Agregar a favoritos" aria-label="Agregar a favoritos">
+                <span class="fav-icon">♥</span>
+              </button>
+              <img src="${imagen}" alt="${producto.nombre}" 
+                   onerror="console.log('❌ Error cargando imagen:', this.src); this.onerror=null; this.src='https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Sin+Imagen'">
+              ${producto.destacado ? '<div class="badge-destacado">⭐ Destacado</div>' : ''}
+            </div>
+            <div class="producto-info">
+              <div class="producto-nombre">${producto.nombre}</div>
+              <div class="producto-precio">${precio}</div>
+              <div class="producto-detalles">
+                <div class="producto-tienda">${tienda}</div>
+                <div class="producto-codigo">Cód.: ${codigo}</div>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      contador.textContent = `${productos.length} producto${productos.length !== 1 ? 's' : ''} encontrado${productos.length !== 1 ? 's' : ''}`;
+      
+      // Disparar evento para que se actualicen los botones de favoritos
+      document.dispatchEvent(new CustomEvent('cards:rendered'));
+    }
+
+    function obtenerCategorias() {
+      const categorias = new Set();
+      todosProductos.forEach(producto => {
+        if (producto.categoria) {
+          categorias.add(producto.categoria);
+        }
+      });
+      return Array.from(categorias).sort();
+    }
+
+    function obtenerTiendas() {
+      const tiendas = new Set();
+      todosProductos.forEach(producto => {
+        if (producto.tienda) {
+          tiendas.add(producto.tienda);
+        }
+      });
+      return Array.from(tiendas).sort();
+    }
+
+    function actualizarFiltros() {
+      // Actualizar categorías
+      const selectCategoria = document.getElementById('filtro-categoria');
+      const categorias = obtenerCategorias();
+      
+      while (selectCategoria.children.length > 1) {
+        selectCategoria.removeChild(selectCategoria.lastChild);
+      }
+      
+      categorias.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria; // Usar el nombre completo como valor
+        option.textContent = categoria;
+        selectCategoria.appendChild(option);
+      });
+
+      // Actualizar tiendas
+      const selectTienda = document.getElementById('filtro-tienda');
+      const tiendas = obtenerTiendas();
+      
+      while (selectTienda.children.length > 1) {
+        selectTienda.removeChild(selectTienda.lastChild);
+      }
+      
+      tiendas.forEach(tienda => {
+        const option = document.createElement('option');
+        option.value = tienda.toLowerCase();
+        option.textContent = tienda;
+        selectTienda.appendChild(option);
+      });
+    }
+
+    function aplicarFiltros() {
+      let filtrados = [...todosProductos];
+      
+      // Filtrar por categoría
+      if (categoriaActual !== 'todos') {
+        filtrados = filtrados.filter(producto => {
+          // Si categoriaActual es un array, buscar coincidencia con cualquier elemento
+          if (Array.isArray(categoriaActual)) {
+            return categoriaActual.some(cat => producto.categoria === cat);
+          }
+          // Comparar directamente con el nombre de la categoría
+          return producto.categoria === categoriaActual;
+        });
+        console.log(`🔍 Filtrado por categoría '${categoriaActual}': ${filtrados.length} productos`);
+      }
+      
+      // Filtrar por tienda
+      if (tiendaActual !== 'todos') {
+        filtrados = filtrados.filter(producto => 
+          producto.tienda?.toLowerCase() === tiendaActual
+        );
+      }
+      
+      // Ordenar
+      switch (ordenActual) {
+        case 'precio-asc':
+          filtrados.sort((a, b) => (a.precio || 0) - (b.precio || 0));
+          break;
+        case 'precio-desc':
+          filtrados.sort((a, b) => (b.precio || 0) - (a.precio || 0));
+          break;
+        case 'nombre':
+          filtrados.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+          break;
+        case 'recientes':
+          filtrados.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+          break;
+        default: // 'relevantes'
+          filtrados.sort((a, b) => {
+            if (a.destacado && !b.destacado) return -1;
+            if (!a.destacado && b.destacado) return 1;
+            return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+          });
+      }
+      
+      productosFiltrados = filtrados;
+      renderProductos(productosFiltrados);
+    }
+
+    function limpiarFiltros() {
+      categoriaActual = 'todos';
+      tiendaActual = 'todos';
+      ordenActual = 'relevantes';
+      
+      document.getElementById('filtro-categoria').value = 'todos';
+      document.getElementById('filtro-tienda').value = 'todos';
+      document.getElementById('ordenar-por').value = 'relevantes';
+      
+      console.log('🧹 Filtros limpiados, mostrando todos los productos');
+      aplicarFiltros();
+    }
+
+    function configurarEventListeners() {
+      document.getElementById('filtro-categoria').addEventListener('change', (e) => {
+        categoriaActual = e.target.value;
+        console.log(`🏷️ Cambiando filtro de categoría a: ${categoriaActual}`);
+        aplicarFiltros();
+      });
+      
+      document.getElementById('filtro-tienda').addEventListener('change', (e) => {
+        tiendaActual = e.target.value;
+        aplicarFiltros();
+      });
+      
+      document.getElementById('ordenar-por').addEventListener('change', (e) => {
+        ordenActual = e.target.value;
+        aplicarFiltros();
+      });
+    }
+
+    // Función para inicializar la carga de productos - Misma lógica que index.html
+    async function initializeProducts() {
+      // Obtener categoría de la URL
+      categoriaActual = getCategoriaFromURL();
+      console.log(`🚀 Cargando productos desde Supabase para categoría: ${categoriaActual}`);
+      showLoading();
+      
+      try {
+        // Asegurar que Supabase esté inicializado - Misma lógica que index
+        if (typeof window.supabase === 'undefined') {
+          console.log('⏳ Esperando inicialización de Supabase...');
+          await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+              if (typeof window.supabase !== 'undefined') {
+                clearInterval(checkInterval);
+                resolve();
+              }
+            }, 100);
+          });
+        }
+        
+        // Cargar productos usando el mismo patrón del index
+        const productosResult = await SimpleSupabaseService.getAllProducts();
+        if (productosResult.success) {
+          console.log('📊 Datos crudos de Supabase:', productosResult.data.slice(0, 2)); // Debug primeros 2 productos
+          
+          todosProductos = productosResult.data.map(product => ({
+            id: product.id,
+            nombre: product.nombre,
+            categoria: product.categorias ? product.categorias.nombre : 'Sin categoría',
+            codigo: product.id.substr(0, 8),
+            img: product.imagen || 'img/products/default.jpg',
+            precio: product.precio, // Precio original de Supabase
+            tienda: product.tiendas ? product.tiendas.nombre : 'Tienda',
+            stock: product.stock,
+            destacado: product.destacado,
+            url: `producto.html?id=${product.id}`,
+            // Datos originales para filtros
+            categorias: product.categorias,
+            tiendas: product.tiendas,
+            created_at: product.created_at
+          }));
+          
+          console.log('🔄 Productos mapeados:', todosProductos.slice(0, 2)); // Debug productos mapeados
+          
+          // Debug: Mostrar todas las categorías disponibles
+          const categoriasDisponibles = [...new Set(todosProductos.map(p => p.categoria))];
+          console.log('🏷️ Categorías disponibles en los productos:', categoriasDisponibles);
+          console.log('🔍 Buscando categoría:', categoriaActual);
+          
+          actualizarFiltros();
+          configurarEventListeners();
+          
+          // Establecer categoría inicial de la URL
+          if (categoriaActual !== 'todos') {
+            // Buscar el valor correcto para el select
+            const selectCategoria = document.getElementById('filtro-categoria');
+            
+            // Si es array, buscar cualquier coincidencia
+            if (Array.isArray(categoriaActual)) {
+              for (let option of selectCategoria.options) {
+                if (categoriaActual.includes(option.textContent)) {
+                  option.selected = true;
+                  categoriaActual = option.textContent; // Usar la categoría exacta encontrada
+                  break;
+                }
+              }
+            } else {
+              for (let option of selectCategoria.options) {
+                if (option.textContent === categoriaActual) {
+                  option.selected = true;
+                  break;
+                }
+              }
+            }
+          }
+          
+          aplicarFiltros();
+          
+          console.log(`✅ ${todosProductos.length} productos cargados, filtrados por categoría: ${categoriaActual}`);
+        } else {
+          console.error('❌ Error cargando productos:', productosResult.error);
+          mostrarError('Error cargando productos: ' + productosResult.error);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error cargando productos:', error);
+        showErrorMessage('Error cargando productos. Por favor, recarga la página.');
+        mostrarError('Error de conexión. Verifica tu internet e intenta nuevamente.');
+      }
+    }
+
+    // Inicializar cuando DOM esté listo - Misma lógica que index.html
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🌟 DOM cargado, iniciando aplicación...');
+      
+      // Inicializar AOS
+      AOS.init({
+        duration: 600,
+        easing: 'ease-in-out',
+        once: true,
+        offset: 50,
+        delay: 0,
+      });
+      
+      showLoading();
+      // Usar setTimeout para asegurar que todos los scripts estén cargados
+      setTimeout(initializeProducts, 500);
+    });
+
+    // Funciones globales para debug
+    window.debugInfo = function() {
+      console.log('🔍 Debug Info:');
+      console.log('- Productos totales:', todosProductos.length);
+      console.log('- Productos filtrados:', productosFiltrados.length);
+      console.log('- Supabase Client:', typeof window.supabaseClient !== 'undefined');
+      console.log('- SimpleSupabaseService:', typeof SimpleSupabaseService !== 'undefined');
+    };
+  </script>
 </body>
 </html>

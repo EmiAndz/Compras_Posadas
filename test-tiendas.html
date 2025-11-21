@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tiendas - Supabase</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .loading { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>Test Tiendas - Supabase</h1>
+    
+    <div id="status"></div>
+    
+    <div>
+        <button onclick="testConnection()">Test Conexión</button>
+        <button onclick="checkTables()">Verificar Tablas</button>
+        <button onclick="loadStores()">Cargar Tiendas</button>
+        <button onclick="insertTestStores()">Insertar Tiendas de Prueba</button>
+        <button onclick="loadProducts()">Cargar Productos</button>
+        <button onclick="insertTestProducts()">Insertar Productos de Prueba</button>
+        <button onclick="clearAll()">Limpiar Console</button>
+    </div>
+
+    <div id="results">
+        <h3>Resultados:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Scripts de configuración -->
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/services/storeService.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            
+            if (type !== 'info') {
+                status.innerHTML = `<div class="${type}">${message}</div>`;
+                setTimeout(() => status.innerHTML = '', 5000);
+            }
+        }
+
+        function clearAll() {
+            output.textContent = '';
+            status.innerHTML = '';
+        }
+
+        async function testConnection() {
+            log('🔍 Probando conexión a Supabase...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no está disponible');
+                }
+
+                const { data, error } = await window.supabaseClient
+                    .from('categorias')
+                    .select('count')
+                    .limit(1);
+
+                if (error) throw error;
+                
+                log('✅ Conexión exitosa a Supabase', 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function checkTables() {
+            log('🔍 Verificando estructura de tabla tiendas...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no está disponible');
+                }
+
+                // Intentar obtener una fila para ver la estructura
+                const { data, error } = await window.supabaseClient
+                    .from('tiendas')
+                    .select('*')
+                    .limit(1);
+
+                if (error) {
+                    log(`❌ Error accediendo a tabla tiendas: ${error.message}`, 'error');
+                    log('Posibles causas:', 'warning');
+                    log('- La tabla "tiendas" no existe');
+                    log('- No tienes permisos de lectura');
+                    log('- RLS (Row Level Security) está bloqueando el acceso');
+                    return;
+                }
+
+                log('✅ Tabla tiendas accesible', 'success');
+                log(`📊 Registros encontrados: ${data ? data.length : 0}`);
+                
+                if (data && data.length > 0) {
+                    log('📋 Estructura de la primera fila:');
+                    log(JSON.stringify(data[0], null, 2));
+                } else {
+                    log('📭 La tabla está vacía');
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadStores() {
+            log('🏪 Cargando tiendas usando StoreService...');
+            
+            try {
+                if (!window.StoreService) {
+                    throw new Error('StoreService no está disponible');
+                }
+
+                const storeService = new StoreService();
+                const result = await storeService.getAllStores();
+                
+                log(`📊 Resultado: success=${result.success}, mensaje="${result.message}"`);
+                log(`🏪 Tiendas encontradas: ${result.data.length}`);
+                
+                if (result.data.length > 0) {
+                    log('📋 Primeras 3 tiendas:');
+                    result.data.slice(0, 3).forEach((store, index) => {
+                        log(`${index + 1}. ${store.nombre} (${store.email}) - Activa: ${store.activa}`);
+                    });
+                } else {
+                    log('📭 No se encontraron tiendas activas');
+                }
+                
+            } catch (error) {
+                log(`❌ Error cargando tiendas: ${error.message}`, 'error');
+            }
+        }
+
+        async function insertTestStores() {
+            log('➕ Insertando tiendas de prueba...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no está disponible');
+                }
+
+                const testStores = [
+                    {
+                        nombre: 'TechStore Posadas',
+                        descripcion: 'Tienda especializada en tecnología y electrónica',
+                        propietario: 'Juan Pérez',
+                        email: 'info@techstoreposadas.com',
+                        telefono: '+54 376 123-4567',
+                        direccion: 'Av. Corrientes 1234',
+                        barrio: 'Centro',
+                        activa: true,
+                        verificada: true
+                    },
+                    {
+                        nombre: 'Celulares Misiones',
+                        descripcion: 'Venta y reparación de celulares',
+                        propietario: 'María González',
+                        email: 'contacto@celularesmisiones.com',
+                        telefono: '+54 376 987-6543',
+                        direccion: 'San Martín 567',
+                        barrio: 'Centro',
+                        activa: true,
+                        verificada: false
+                    },
+                    {
+                        nombre: 'Belleza Total',
+                        descripcion: 'Cosmética y productos de belleza',
+                        propietario: 'Ana López',
+                        email: 'info@bellezatotal.com',
+                        telefono: '+54 376 456-7890',
+                        direccion: 'Junín 890',
+                        barrio: 'Villa Cabello',
+                        activa: true,
+                        verificada: true
+                    }
+                ];
+
+                let insertedCount = 0;
+                for (const store of testStores) {
+                    try {
+                        const { data, error } = await window.supabaseClient
+                            .from('tiendas')
+                            .insert([store])
+                            .select();
+
+                        if (error) {
+                            if (error.message.includes('duplicate') || error.code === '23505') {
+                                log(`⚠️ La tienda "${store.nombre}" ya existe`);
+                            } else {
+                                throw error;
+                            }
+                        } else {
+                            log(`✅ Tienda "${store.nombre}" insertada correctamente`);
+                            insertedCount++;
+                        }
+                    } catch (storeError) {
+                        log(`❌ Error insertando "${store.nombre}": ${storeError.message}`);
+                    }
+                }
+
+                log(`🎉 Proceso completado. ${insertedCount} tiendas insertadas.`, 'success');
+                
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`, 'error');
+            }
+        }
+
+        async function insertTestProducts() {
+            log('📦 Insertando productos de prueba...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no está disponible');
+                }
+
+                // Primero obtener tiendas para asociar productos
+                const { data: tiendas, error: tiendasError } = await window.supabaseClient
+                    .from('tiendas')
+                    .select('id, nombre')
+                    .eq('activa', true)
+                    .limit(3);
+
+                if (tiendasError) throw tiendasError;
+
+                if (!tiendas || tiendas.length === 0) {
+                    throw new Error('No hay tiendas disponibles. Inserta tiendas primero.');
+                }
+
+                log(`✅ Encontradas ${tiendas.length} tiendas para asociar productos`);
+
+                // Obtener categorías
+                const { data: categorias, error: categoriasError } = await window.supabaseClient
+                    .from('categorias')
+                    .select('id, nombre')
+                    .limit(5);
+
+                if (categoriasError) throw categoriasError;
+
+                if (!categorias || categorias.length === 0) {
+                    throw new Error('No hay categorías disponibles.');
+                }
+
+                log(`✅ Encontradas ${categorias.length} categorías`);
+
+                // Productos de prueba para cada tienda
+                const productosBase = [
+                    {
+                        nombre: 'iPhone 15 Pro Max',
+                        descripcion: 'Smartphone Apple última generación con 256GB',
+                        precio: 1299.99,
+                        precio_original: 1399.99,
+                        imagen: 'https://via.placeholder.com/300x300/007bff/ffffff?text=iPhone+15',
+                        stock: 10,
+                        destacado: true,
+                        activo: true
+                    },
+                    {
+                        nombre: 'Samsung Galaxy S24 Ultra',
+                        descripcion: 'Smartphone Samsung flagship con S Pen incluido',
+                        precio: 1199.99,
+                        imagen: 'https://via.placeholder.com/300x300/28a745/ffffff?text=Galaxy+S24',
+                        stock: 15,
+                        destacado: false,
+                        activo: true
+                    },
+                    {
+                        nombre: 'MacBook Air M3',
+                        descripcion: 'Notebook Apple con chip M3, 13 pulgadas',
+                        precio: 1599.99,
+                        imagen: 'https://via.placeholder.com/300x300/6f42c1/ffffff?text=MacBook',
+                        stock: 5,
+                        destacado: true,
+                        activo: true
+                    },
+                    {
+                        nombre: 'AirPods Pro 3ra Gen',
+                        descripcion: 'Auriculares inalámbricos con cancelación de ruido',
+                        precio: 249.99,
+                        imagen: 'https://via.placeholder.com/300x300/fd7e14/ffffff?text=AirPods',
+                        stock: 25,
+                        destacado: false,
+                        activo: true
+                    },
+                    {
+                        nombre: 'Crema Hidratante Premium',
+                        descripcion: 'Crema facial hidratante para todo tipo de piel',
+                        precio: 89.99,
+                        imagen: 'https://via.placeholder.com/300x300/e83e8c/ffffff?text=Crema',
+                        stock: 50,
+                        destacado: false,
+                        activo: true
+                    }
+                ];
+
+                let insertedCount = 0;
+                let totalProducts = 0;
+
+                // Insertar productos para cada tienda
+                for (const tienda of tiendas) {
+                    log(`📦 Insertando productos para ${tienda.nombre}...`);
+                    
+                    // Seleccionar productos según el tipo de tienda
+                    let productosParaTienda = [];
+                    
+                    if (tienda.nombre.toLowerCase().includes('tech') || tienda.nombre.toLowerCase().includes('celular')) {
+                        productosParaTienda = productosBase.slice(0, 4); // Productos tech
+                    } else if (tienda.nombre.toLowerCase().includes('belleza') || tienda.nombre.toLowerCase().includes('cosmetica')) {
+                        productosParaTienda = [productosBase[4]]; // Productos de belleza
+                    } else {
+                        productosParaTienda = productosBase.slice(0, 3); // Mix de productos
+                    }
+
+                    for (const producto of productosParaTienda) {
+                        try {
+                            // Seleccionar categoría apropiada
+                            let categoriaId = categorias[0].id; // Por defecto
+                            
+                            if (producto.nombre.toLowerCase().includes('iphone') || producto.nombre.toLowerCase().includes('samsung')) {
+                                categoriaId = categorias.find(c => c.nombre.toLowerCase().includes('celular') || c.nombre.toLowerCase().includes('electrónica'))?.id || categorias[0].id;
+                            } else if (producto.nombre.toLowerCase().includes('macbook')) {
+                                categoriaId = categorias.find(c => c.nombre.toLowerCase().includes('informática') || c.nombre.toLowerCase().includes('electrónica'))?.id || categorias[0].id;
+                            } else if (producto.nombre.toLowerCase().includes('crema')) {
+                                categoriaId = categorias.find(c => c.nombre.toLowerCase().includes('cosmética') || c.nombre.toLowerCase().includes('belleza'))?.id || categorias[0].id;
+                            }
+
+                            const productoCompleto = {
+                                ...producto,
+                                tienda_id: tienda.id,
+                                categoria_id: categoriaId,
+                                usuario_alta: 'test'
+                            };
+
+                            const { data, error } = await window.supabaseClient
+                                .from('productos')
+                                .insert([productoCompleto])
+                                .select();
+
+                            if (error) {
+                                if (error.message.includes('duplicate') || error.code === '23505') {
+                                    log(`⚠️ Producto "${producto.nombre}" ya existe en ${tienda.nombre}`);
+                                } else {
+                                    throw error;
+                                }
+                            } else {
+                                log(`✅ "${producto.nombre}" agregado a ${tienda.nombre}`);
+                                insertedCount++;
+                            }
+                            totalProducts++;
+                            
+                        } catch (productError) {
+                            log(`❌ Error insertando "${producto.nombre}" en ${tienda.nombre}: ${productError.message}`);
+                        }
+                    }
+                }
+
+                log(`🎉 Proceso completado. ${insertedCount}/${totalProducts} productos insertados.`, 'success');
+                
+                // Verificar productos insertados
+                setTimeout(() => {
+                    loadProducts();
+                }, 1000);
+                
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadProducts() {
+            log('📦 Verificando productos cargados...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Cliente Supabase no está disponible');
+                }
+
+                const { data, error } = await window.supabaseClient
+                    .from('productos')
+                    .select(`
+                        *,
+                        tiendas:tienda_id (nombre),
+                        categorias:categoria_id (nombre)
+                    `)
+                    .eq('activo', true)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                log(`📊 Productos encontrados: ${data ? data.length : 0}`);
+                
+                if (data && data.length > 0) {
+                    log('📋 Últimos productos:');
+                    data.slice(0, 5).forEach((producto, index) => {
+                        log(`${index + 1}. ${producto.nombre} - $${producto.precio} (${producto.tiendas?.nombre || 'Sin tienda'}) - ${producto.categorias?.nombre || 'Sin categoría'}`);
+                    });
+                } else {
+                    log('📭 No se encontraron productos activos');
+                }
+                
+            } catch (error) {
+                log(`❌ Error verificando productos: ${error.message}`, 'error');
+            }
+        }
+
+        // Inicializar cuando esté todo listo
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Test de tiendas iniciado');
+            log('Esperando inicialización de Supabase...');
+            
+            setTimeout(() => {
+                if (window.supabaseClient) {
+                    log('✅ Supabase inicializado correctamente');
+                } else {
+                    log('❌ Supabase no se pudo inicializar', 'error');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

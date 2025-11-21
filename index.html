@@ -19,18 +19,37 @@
         <span class="logo-icon"></span>
         <span class="brand__name"><strong>Compras</strong> Posadas</span>
       </a>
-      <form class="search" role="search" aria-label="Buscar productos" data-aos="fade-up" data-aos-delay="300">
-        <input 
-          type="search" 
-          placeholder="Buscar por producto, categoría, tienda" 
-          aria-label="Buscar producto" 
-        />
-        <button type="submit" class="btn-icon" aria-label="Buscar">
-          <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
-            <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
+      <form class="search" role="search" aria-label="Buscar productos" data-aos="fade-up" data-aos-delay="300" id="searchForm">
+        <div class="search__container">
+          <div class="search__input-wrapper">
+            <input 
+              type="search" 
+              placeholder="Buscar por producto, categoría, tienda" 
+              aria-label="Buscar producto"
+              id="searchInput"
+              autocomplete="off"
+            />
+            <button type="button" class="search__clear-btn" id="clearSearchBtn" aria-label="Limpiar búsqueda" style="display: none;">
+              <span>×</span>
+            </button>
+            <button type="submit" class="btn-icon" aria-label="Buscar">
+              <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+                <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Dropdown de sugerencias debajo del input -->
+          <div class="search__dropdown" id="searchDropdown" style="display: none;">
+            <div class="search__suggestion-item" id="searchSuggestion">
+              <span class="search__suggestion-text" id="suggestionText"></span>
+              <div class="search__loading" id="searchLoading" style="display: none;">
+                <div class="search__spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
       <nav class="actions" data-aos="fade-left" data-aos-delay="400">
         <button id="btnWishlist" class="action-btn wishlist-btn" aria-haspopup="true" aria-controls="wishlistDrawer" aria-expanded="false">
@@ -86,16 +105,16 @@
         <button class="sidebar__close" aria-label="Cerrar menú">✕</button>
       </div>
       <nav class="sidebar__nav">
-        <a href="#" data-aos="fade-right" data-aos-delay="300"><span>📱</span> Celulares</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="350"><span>🖥️</span> Electrónica</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="400"><span>💄</span> Cosmetica</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="450"><span>💻</span> Informática</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="500"><span>🏕️</span> Camping</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="550"><span>🍏</span> Apple</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="600"><span>👕</span> Indumentaria</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="650"><span>👟</span> Calzado</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="700"><span>🏷️</span> Ofertas y descuentos</a>
-        <a href="#" data-aos="fade-right" data-aos-delay="750"><span>🗂️</span> Todas las categorías</a>
+        <a href="listado_box.html?categoria=celulares" data-aos="fade-right" data-aos-delay="300"><span>📱</span> Celulares</a>
+        <a href="listado_box.html?categoria=electronica" data-aos="fade-right" data-aos-delay="350"><span>🖥️</span> Electrónica</a>
+        <a href="listado_box.html?categoria=cosmetica" data-aos="fade-right" data-aos-delay="400"><span>💄</span> Cosmetica</a>
+        <a href="listado_box.html?categoria=informatica" data-aos="fade-right" data-aos-delay="450"><span>💻</span> Informática</a>
+        <a href="listado_box.html?categoria=camping" data-aos="fade-right" data-aos-delay="500"><span>🏕️</span> Camping</a>
+        <a href="listado_box.html?categoria=apple" data-aos="fade-right" data-aos-delay="550"><span>🍏</span> Apple</a>
+        <a href="listado_box.html?categoria=indumentaria" data-aos="fade-right" data-aos-delay="600"><span>👕</span> Indumentaria</a>
+        <a href="listado_box.html?categoria=calzado" data-aos="fade-right" data-aos-delay="650"><span>👟</span> Calzado</a>
+        <a href="listado_box.html?categoria=ofertas" data-aos="fade-right" data-aos-delay="700"><span>🏷️</span> Ofertas y descuentos</a>
+        <a href="listado_box.html?categoria=todas" data-aos="fade-right" data-aos-delay="750"><span>🗂️</span> Todas las categorías</a>
       </nav>
     </aside>
 
@@ -177,75 +196,203 @@
       </style>
 
       <script>
-        // Datos de productos recomendados
-        const recomendados = [
-          {
-            id: 1,
-            nombre: "Notebook Gamer HP OMEN 16 Slim 16-AMD 4th Intel Core Ultra 9 285H Pantalla WQXGA 16.0\" / 16GB De RAM / 1TB SSD / Win11Home / GeForce...",
-            categoria: "Notebook",
-            codigo: "54158",
-            img: "img/products/notebook.jpg",
-            usd: "1.715,00",
-            brl: "9.276,54",
-            pyg: "12.402.700",
-            url: "producto.html"
-          },
-          {
-            id: 2,
-            nombre: "Mini PC Macrovip NanoBOX K1 Intel Core i5 1215U De 1.2GHz / 8GB De RAM / 512GB SSD / Win11Pro - Negro",
-            categoria: "Mini PC",
-            codigo: "54093",
-            img: "img/products/smartphone.jpg",
-            usd: "225,00",
-            brl: "1.228,50",
-            pyg: "1.642.500",
-            url: "producto.html"
-          },
-          {
-            id: 3,
-            nombre: "Mini PC Beelink EQR6 AMD Ryzen 7 5800H De 3.2GHz / 32GB De RAM / 500GB SSD / Win11Pro - Milky Gris",
-            categoria: "Mini PC",
-            codigo: "54407",
-            img: "img/products/auriculares.jpg",
-            usd: "375,00",
-            brl: "2.047,50",
-            pyg: "2.737.500",
-            url: "producto.html"
-          },
-          {
-            id: 4,
-            nombre: "Mini PC Macrovip NanoBOX K1 Intel N100 / 8GB De RAM / 256GB SSD / Win11Pro - Negro",
-            categoria: "Mini PC",
-            codigo: "54095",
-            img: "img/products/perfume.jpg",
-            usd: "147,00",
-            brl: "802,62",
-            pyg: "1.073.100",
-            url: "producto.html"
-          },
-          {
-            id: 5,
-            nombre: "Samsung Galaxy S25 Ultra 256GB - Titanium Black",
-            categoria: "Smartphone",
-            codigo: "54201",
-            img: "img/products/samsung_s25.jpg",
-            usd: "1.299,00",
-            brl: "7.094,55",
-            pyg: "9.492.150",
-            url: "producto.html"
-          },
-          {
-            id: 6,
-            nombre: "ADATA SPECTRIX D60G RGB 16GB DDR4 3200MHz",
-            categoria: "Memoria RAM",
-            codigo: "54302",
-            img: "img/products/notebook.jpg",
-            usd: "89,00",
-            brl: "485,95",
-            pyg: "650.050",
-            url: "producto.html"
+        // Función para formatear precios en pesos argentinos con formato es-AR
+        const formatARS = (precio) => {
+          if (!precio || precio === 0) return 'Consultar precio';
+          const valor = Number(precio); // por si Supabase lo manda como string
+          return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }).format(valor);
+        };
+
+        // Cargar productos desde Supabase
+        let recomendados = [];
+        let productosDestacados = [];
+
+        // Función para renderizar productos más buscados
+        function renderMasBuscados() {
+          const track = document.getElementById('mas-buscados-track');
+          track.innerHTML = '';
+
+          if (productosDestacados.length === 0) {
+            track.innerHTML = '<div class="flex items-center justify-center w-full p-8 text-gray-500">No hay productos disponibles</div>';
+            return;
           }
-        ];
+
+          productosDestacados.forEach((producto, index) => {
+            const card = document.createElement('div');
+            card.className = 'snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0';
+            card.setAttribute('data-card-id', `mb-${producto.id}`);
+            card.setAttribute('data-aos', 'flip-left');
+            card.setAttribute('data-aos-delay', (index * 100 + 100).toString());
+            
+            // Función para formatear precios en pesos argentinos con formato es-AR
+            const formatARS = (precio) => {
+              if (!precio || precio === 0) return 'Consultar precio';
+              const valor = Number(precio); // por si Supabase lo manda como string
+              return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(valor);
+            };
+            
+            // Formato de precios
+            const arsPrice = formatARS(producto.precio);
+            const codigo = producto.id.toString().substr(0, 8);
+            
+            card.innerHTML = `
+              <div class="relative">
+                <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
+                        data-product-id="mb-${producto.id}" 
+                        aria-label="Agregar a favoritos" 
+                        aria-pressed="false">
+                  <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
+                </button>
+                <a href="producto.html?id=${producto.id}" class="block">
+                  <div class="text-center">
+                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">${producto.categoria}</h3>
+                    <div class="mb-4">
+                      <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-32 object-contain bg-gray-50 rounded-md">
+                    </div>
+                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">${producto.nombre}</h4>
+                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: ${codigo}</p>
+                    <div class="space-y-1">
+                      <p class="text-emerald-600 text-xl font-bold">${arsPrice}</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            `;
+            
+            track.appendChild(card);
+          });
+
+          // Inicializar botones de favoritos
+          initializeFavoriteButtons();
+          updateMasBuscadosDots();
+          
+          // Refresh AOS para las nuevas cards
+          if (typeof AOS !== 'undefined') {
+            setTimeout(() => {
+              AOS.refresh();
+            }, 100);
+          }
+        }
+
+        // Función para mostrar loading en más buscados
+        function showMasBuscadosLoading() {
+          const track = document.getElementById('mas-buscados-track');
+          if (track) {
+            track.innerHTML = '<div class="flex items-center justify-center w-full p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div><span class="ml-3">Cargando productos...</span></div>';
+          }
+        }
+
+        // Función para inicializar la carga de productos
+        async function initializeProducts() {
+          console.log('🚀 Cargando productos desde Supabase...');
+          
+          try {
+            // Asegurar que Supabase esté inicializado
+            if (typeof window.supabase === 'undefined') {
+              console.log('⏳ Esperando inicialización de Supabase...');
+              await new Promise(resolve => {
+                const checkInterval = setInterval(() => {
+                  if (typeof window.supabase !== 'undefined') {
+                    clearInterval(checkInterval);
+                    resolve();
+                  }
+                }, 100);
+              });
+            }
+            
+            // Cargar productos destacados para "RECOMENDADOS"
+            const productosResult = await SimpleSupabaseService.getFeaturedProducts(8);
+            if (productosResult.success) {
+              recomendados = productosResult.data.map(product => ({
+                id: product.id,
+                nombre: product.nombre,
+                categoria: product.categorias ? product.categorias.nombre : 'Sin categoría',
+                codigo: product.id.substr(0, 8),
+                img: product.imagen || 'img/products/default.jpg',
+                precio: product.precio,
+                tienda: product.tiendas ? product.tiendas.nombre : 'Tienda',
+                stock: product.stock,
+                destacado: product.destacado,
+                url: `producto.html?id=${product.id}`
+              }));
+              
+              console.log(`✅ ${recomendados.length} productos destacados cargados`);
+              renderRecomendados();
+            } else {
+              console.error('❌ Error cargando productos destacados:', productosResult.error);
+              recomendados = [];
+              renderRecomendados();
+            }
+            
+            // Cargar productos para "MÁS BUSCADOS" (productos más recientes o por categorías específicas)
+            const masBuscadosResult = await SimpleSupabaseService.getAllProducts();
+            if (masBuscadosResult.success) {
+              // Filtrar y seleccionar 8 productos para más buscados
+              productosDestacados = masBuscadosResult.data.slice(0, 8).map(product => ({
+                id: product.id,
+                nombre: product.nombre,
+                categoria: product.categorias ? product.categorias.nombre : 'Sin categoría',
+                precio: product.precio,
+                imagen: product.imagen || 'img/products/default.jpg',
+                tienda: product.tiendas ? product.tiendas.nombre : 'Tienda',
+                stock: product.stock
+              }));
+              
+              console.log(`✅ ${productosDestacados.length} productos para MÁS BUSCADOS cargados`);
+              renderMasBuscados();
+            } else {
+              console.error('❌ Error cargando productos para más buscados:', masBuscadosResult.error);
+              productosDestacados = [];
+              renderMasBuscados();
+            }
+            
+          } catch (error) {
+            console.error('❌ Error cargando productos:', error);
+            showErrorMessage('Error cargando productos. Por favor, recarga la página.');
+            recomendados = [];
+            productosDestacados = [];
+            renderRecomendados();
+            renderMasBuscados();
+          }
+        }
+        
+        // Función para mostrar mensajes de error
+        function showErrorMessage(message) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-md z-50';
+          errorDiv.textContent = message;
+          document.body.appendChild(errorDiv);
+          
+          setTimeout(() => {
+            errorDiv.remove();
+          }, 5000);
+        }
+        
+        // Función para mostrar loading
+        function showLoading() {
+          const track = document.getElementById('recomendados-track');
+          if (track) {
+            track.innerHTML = '<div class="flex items-center justify-center w-full p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div><span class="ml-3">Cargando productos...</span></div>';
+          }
+        }
+        
+        // Inicializar productos cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+          showLoading();
+          showMasBuscadosLoading();
+          // Usar setTimeout para asegurar que todos los scripts estén cargados
+          setTimeout(initializeProducts, 500);
+        });
 
         let currentPage = 0;
         let itemsPerPage = 4;
@@ -291,9 +438,7 @@
                     <h3 class="text-sm text-gray-800 line-clamp-2 leading-tight">${producto.nombre}</h3>
                     <p class="text-xs text-gray-500">CÓDIGO: ${producto.codigo}</p>
                     <div class="space-y-1">
-                      <p class="text-emerald-600 text-2xl font-extrabold">U$ ${producto.usd}</p>
-                      <p class="text-[11px] text-gray-500">R$ ${producto.brl}</p>
-                      <p class="text-[11px] text-gray-500">G$ ${producto.pyg}</p>
+                      <p class="text-emerald-600 text-2xl font-extrabold">${formatARS(producto.precio)}</p>
                     </div>
                   </div>
                 </a>
@@ -306,6 +451,13 @@
           // Inicializar estado de favoritos en las cards recién creadas
           initializeFavoriteButtons();
           updateDots();
+          
+          // Refresh AOS para las nuevas cards
+          if (typeof AOS !== 'undefined') {
+            setTimeout(() => {
+              AOS.refresh();
+            }, 100);
+          }
         }
 
         function scrollToPage(pageIndex) {
@@ -419,7 +571,7 @@
 
         function updateMasBuscadosDots() {
           const itemsPerPage = getMasBuscadosItemsPerPage();
-          const totalItems = 8; // Total de productos en más buscados
+          const totalItems = productosDestacados.length; // Usar la longitud real del array
           const totalPages = Math.ceil(totalItems / itemsPerPage);
           const dotsContainer = document.getElementById('mas-buscados-dots');
           
@@ -466,7 +618,7 @@
 
           masBuscadosNextBtn.addEventListener('click', () => {
             const itemsPerPage = getMasBuscadosItemsPerPage();
-            const totalPages = Math.ceil(8 / itemsPerPage);
+            const totalPages = Math.ceil(productosDestacados.length / itemsPerPage);
             const newPage = Math.min(totalPages - 1, currentMasBuscadosPage + 1);
             scrollMasBuscadosToPage(newPage);
           });
@@ -478,12 +630,6 @@
           window.addEventListener('resize', () => {
             updateMasBuscadosDots();
           });
-
-          // Inicializar dots
-          updateMasBuscadosDots();
-          
-          // Inicializar botones de favoritos para productos más buscados
-          initializeFavoriteButtons();
         });
       </script>
 
@@ -516,205 +662,7 @@
           <!-- Contenedor del carrusel -->
           <div id="mas-buscados-carousel" class="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
             <div id="mas-buscados-track" class="grid grid-flow-col gap-6 auto-cols-[90%] sm:auto-cols-[45%] lg:auto-cols-[23%] pb-4">
-              <!-- Producto 1 - Mouse -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-1" data-aos="flip-left" data-aos-delay="100">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-1" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Mouse</h3>
-                    <div class="mb-4">
-                      <img src="img/products/auriculares.jpg" alt="Mouse Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Mouse Gamer Redragon M711RGB Cobra USB / RGB - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 15420</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 19,00</p>
-                      <p class="text-xs text-gray-500">R$ 103,74</p>
-                      <p class="text-xs text-gray-500">G$ 138.700</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 2 - Teclados -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-2" data-aos="flip-left" data-aos-delay="200">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-2" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Teclados</h3>
-                    <div class="mb-4">
-                      <img src="img/products/notebook.jpg" alt="Teclado Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Teclado Gamer Satellite AK-837 USB / RGB / Portugués - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16441</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 9,00</p>
-                      <p class="text-xs text-gray-500">R$ 49,14</p>
-                      <p class="text-xs text-gray-500">G$ 65.700</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 3 - Teclados -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-3" data-aos="flip-left" data-aos-delay="300">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-3" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Teclados</h3>
-                    <div class="mb-4">
-                      <img src="img/products/perfume.jpg" alt="Teclado Mecánico" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Teclado Redragon Gamer/Gaming Yama Mechanical K550RGB-1 - Preto</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16730</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 54,60</p>
-                      <p class="text-xs text-gray-500">R$ 298,12</p>
-                      <p class="text-xs text-gray-500">G$ 398.580</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 4 - Controles y Accesorios -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-4" data-aos="flip-left" data-aos-delay="400">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-4" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Controles y Accesorios</h3>
-                    <div class="mb-4">
-                      <img src="img/products/samsung_s25.jpg" alt="Control Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Control Redragon G807 Saturn Vibration Para PS3 / PC / USB - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 16743</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 15,90</p>
-                      <p class="text-xs text-gray-500">R$ 85,81</p>
-                      <p class="text-xs text-gray-500">G$ 116.070</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 5 - Auriculares -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-5" data-aos="flip-left" data-aos-delay="500">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-5" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Auriculares</h3>
-                    <div class="mb-4">
-                      <img src="img/products/smartphone.jpg" alt="Auriculares Gamer" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Auriculares Gamer Redragon Zeus H510 USB 7.1 - Negro/Rojo</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 17856</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 32,50</p>
-                      <p class="text-xs text-gray-500">R$ 177,38</p>
-                      <p class="text-xs text-gray-500">G$ 237.250</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 6 - Webcam -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-6" data-aos="flip-left" data-aos-delay="600">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-6" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Webcam</h3>
-                    <div class="mb-4">
-                      <img src="img/products/notebook.jpg" alt="Webcam HD" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Webcam Logitech C920 HD Pro 1080p USB - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 18294</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 89,90</p>
-                      <p class="text-xs text-gray-500">R$ 490,45</p>
-                      <p class="text-xs text-gray-500">G$ 656.310</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 7 - Monitor -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-7" data-aos="flip-left" data-aos-delay="700">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-7" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Monitor</h3>
-                    <div class="mb-4">
-                      <img src="img/products/perfume.jpg" alt="Monitor Gaming" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Monitor Gamer AOC 24G2 24" 144Hz IPS Full HD - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 19157</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 185,00</p>
-                      <p class="text-xs text-gray-500">R$ 1.009,25</p>
-                      <p class="text-xs text-gray-500">G$ 1.351.250</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Producto 8 - Parlantes -->
-              <div class="snap-start bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-300 flex-shrink-0" data-card-id="mb-8" data-aos="flip-left" data-aos-delay="800">
-                <div class="relative">
-                  <button class="fav-btn absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:shadow-lg transition-all duration-200" 
-                          data-product-id="mb-8" 
-                          aria-label="Agregar a favoritos" 
-                          aria-pressed="false">
-                    <span class="fav-icon text-gray-400 hover:text-red-500 transition-colors duration-200">♥</span>
-                  </button>
-                  <div class="text-center">
-                    <h3 class="text-emerald-600 font-semibold text-lg mb-4">Parlantes</h3>
-                    <div class="mb-4">
-                      <img src="img/products/samsung_s25.jpg" alt="Parlantes Gaming" class="w-full h-32 object-contain bg-gray-50 rounded-md">
-                    </div>
-                    <h4 class="text-sm text-gray-800 mb-2 line-clamp-2">Parlantes Gaming Redragon Orpheus GS560 RGB 2.1 - Negro</h4>
-                    <p class="text-xs text-gray-500 mb-3">CÓDIGO: 20485</p>
-                    <div class="space-y-1">
-                      <p class="text-emerald-600 text-xl font-bold">U$ 45,90</p>
-                      <p class="text-xs text-gray-500">R$ 250,42</p>
-                      <p class="text-xs text-gray-500">G$ 335.070</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <!-- Los productos se cargan dinámicamente aquí -->
             </div>
           </div>
 
@@ -828,10 +776,17 @@
 
   <script src="assets/js/script.js"></script>
   
+  <!-- Scripts de Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config/supabase.js"></script>
+  <script src="assets/js/global-search.js"></script>
+  <script src="assets/js/services/simpleServices.js"></script>
+  
   <!-- Inicialización del plugin AOS -->
   <script>
     // Inicializar AOS cuando el documento esté listo
     document.addEventListener('DOMContentLoaded', function() {
+      // Inicializar AOS
       AOS.init({
         duration: 600,    // Duración por defecto de las animaciones
         easing: 'ease-in-out',  // Tipo de transición
@@ -844,18 +799,6 @@
       window.addEventListener('resize', function() {
         AOS.refresh();
       });
-      
-      // Refresh AOS cuando se cargan nuevos productos dinámicamente
-      const originalRenderRecomendados = window.renderRecomendados;
-      if (originalRenderRecomendados) {
-        window.renderRecomendados = function() {
-          originalRenderRecomendados();
-          // Refresh AOS después de cargar nuevos elementos
-          setTimeout(() => {
-            AOS.refresh();
-          }, 100);
-        };
-      }
     });
   </script>
 </body>

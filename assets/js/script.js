@@ -92,88 +92,6 @@ document.addEventListener('DOMContentLoaded', function () {
   update();
   startAutoplay();
 });
-// Buscador con sugerencias
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('.search');
-  const input = form?.querySelector('input[type="search"]');
-  if (!form || !input) return;
-
-  const SUGGESTIONS = [
-    'Xiaomi Redmi 13',
-    'Motorola G54',
-    'Auriculares Bluetooth',
-    'Notebook 15.6"',
-    'Perfume Carolina Herrera',
-    'Smart TV 50"',
-    'Apple iPhone 13'
-  ];
-
-  // Sugerencias
-  const sugg = document.createElement('div');
-  sugg.className = 'suggest';
-  sugg.innerHTML = '<ul></ul>';
-  form.appendChild(sugg);
-  const list = sugg.querySelector('ul');
-  let currentItems = [];
-  let current = -1;
-
-  const render = (items) => {
-    list.innerHTML = items.map((t, i) => `<li data-i="${i}">${t}</li>`).join('');
-    sugg.classList.toggle('visible', items.length > 0);
-    current = -1;
-  };
-
-  const filter = (q) => {
-    if (!q || q.trim().length < 2) { render([]); return; }
-    const s = q.toLowerCase();
-    currentItems = SUGGESTIONS.filter(x => x.toLowerCase().includes(s)).slice(0,6);
-    render(currentItems);
-  };
-
-  input.addEventListener('input', (e) => {
-    clearTimeout(input.__t);
-    input.__t = setTimeout(() => filter(e.target.value), 180);
-  });
-
-  input.addEventListener('keydown', (e) => {
-    const visible = sugg.classList.contains('visible');
-    if (!visible) return;
-    const items = [...list.querySelectorAll('li')];
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      current = (current + 1) % items.length;
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      current = (current - 1 + items.length) % items.length;
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (current >= 0) input.value = currentItems[current];
-      sugg.classList.remove('visible');
-      form.submit();
-      return;
-    } else if (e.key === 'Escape') {
-      sugg.classList.remove('visible');
-      return;
-    } else {
-      return;
-    }
-    items.forEach((li,i)=> li.classList.toggle('active', i===current));
-  });
-
-  list.addEventListener('click', (e) => {
-    const li = e.target.closest('li');
-    if (!li) return;
-    const i = +li.dataset.i;
-    input.value = currentItems[i] || input.value;
-    sugg.classList.remove('visible');
-    form.submit();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!form.contains(e.target)) sugg.classList.remove('visible');
-  });
-});
-
 // === Mobile Sidebar Logic ===
 document.addEventListener('DOMContentLoaded', function () {
   const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
@@ -994,9 +912,17 @@ document.addEventListener('DOMContentLoaded', function() {
     wlCount.textContent = String(count);
   }
 
+  // Cache para almacenar datos de productos
+  const productCache = new Map();
+
   // Función para obtener datos de producto por ID
-  function getProductDataById(id) {
-    // Intentar resolver desde una card visible en el DOM
+  async function getProductDataById(id) {
+    // Verificar cache primero
+    if (productCache.has(id)) {
+      return productCache.get(id);
+    }
+
+    // Intentar desde el DOM (para productos ya cargados)
     const selectors = [
       `.card[data-card-id="${id}"]`,
       `[data-product-id="${id}"]`,
@@ -1011,16 +937,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (card) {
       // Extraer datos de la card
-      const nameSelectors = ['.card__title', '.product-title', 'h3', 'h4', '.title'];
+      const nameSelectors = ['.card__title', '.product-title', 'h3', 'h4', '.title', '.product-name', '[data-product-name]'];
       const priceSelectors = ['.card__price', '.product-price', '.price', '.text-emerald-600'];
-      const imgSelectors = ['.card__img img', 'img', '.product-image'];
+      const imgSelectors = ['.card__img img', 'img', '.product-image', '.card img', '[data-img]'];
       
-      let name = 'Producto';
+      let name = '';
       for (const sel of nameSelectors) {
         const el = card.querySelector(sel);
         if (el?.textContent?.trim()) {
           name = el.textContent.trim();
+          console.log(`Nombre encontrado con selector '${sel}':`, name);
           break;
+        }
+        // También verificar atributos data
+        if (el?.dataset?.name) {
+          name = el.dataset.name;
+          console.log(`Nombre encontrado en data-name:`, name);
+          break;
+        }
+      }
+      
+      // Si no se encontró nombre, intentar desde el atributo title o alt de la imagen
+      if (!name) {
+        const titleEl = card.querySelector('[title]');
+        if (titleEl?.title) {
+          name = titleEl.title;
+          console.log('Nombre desde title:', name);
         }
       }
       
@@ -1036,78 +978,255 @@ document.addEventListener('DOMContentLoaded', function() {
       let img = '';
       for (const sel of imgSelectors) {
         const el = card.querySelector(sel);
-        if (el?.src) {
+        if (el?.src && el.src !== '' && el.src !== 'undefined' && !el.src.includes('undefined')) {
           img = el.src;
+          break;
+        }
+        // También verificar data attributes
+        if (el?.dataset?.img && el.dataset.img !== '' && el.dataset.img !== 'undefined') {
+          img = el.dataset.img;
           break;
         }
       }
       
-      return { id, name, price, img };
+      const productData = { id, name: name || `Producto #${id}`, price, img };
+      console.log('Datos extraídos del DOM:', productData);
+      productCache.set(id, productData);
+      return productData;
+    }
+
+    // Intentar obtener desde Supabase si ProductService está disponible
+    if (typeof ProductService !== 'undefined') {
+      try {
+        const productService = new ProductService();
+        console.log(`\n>>> BUSCANDO PRODUCTO EN SUPABASE CON UUID: ${id} <<<`);
+        const response = await productService.getProductById(id);
+        
+        console.log('Respuesta completa de Supabase:', response);
+        
+        if (response.success && response.data) {
+          const product = response.data;
+          console.log('=== DATOS COMPLETOS DESDE SUPABASE ===');
+          console.log('Producto completo:', JSON.stringify(product, null, 2));
+          console.log('ID:', product.id);
+          console.log('Nombre (product.nombre):', product.nombre);
+          console.log('Precio (product.precio):', product.precio);
+          console.log('Imagen (product.imagen):', product.imagen);
+          console.log('Tienda:', product.tiendas);
+          console.log('==========================================');
+          
+          // Extraer nombre del producto con verificación estricta
+          let productName = '';
+          if (product.nombre && typeof product.nombre === 'string' && product.nombre.trim() !== '') {
+            productName = product.nombre.trim();
+            console.log('✓ Usando nombre desde BD (product.nombre):', productName);
+          } else {
+            console.log('⚠ Campo product.nombre vacío o no existe');
+            console.log('Campos disponibles en product:', Object.keys(product));
+            // Intentar otros posibles campos
+            productName = product.name || product.title || product.nombre_producto || `Sin nombre (${id.substring(0, 8)})`;
+            console.log('✓ Usando nombre fallback:', productName);
+          }
+          
+          // Manejar imagen con fallbacks
+          let imageUrl = product.imagen || '';
+          
+          // Si no hay imagen, intentar construir URL desde Supabase Storage
+          if (!imageUrl || imageUrl === '') {
+            // Primero intentar desde el storage
+            const supabaseUrl = 'https://ckcbzefrzjhnbbdaenrg.supabase.co';
+            imageUrl = `${supabaseUrl}/storage/v1/object/public/products/${product.id}.jpg`;
+            console.log('Intentando imagen desde storage:', imageUrl);
+          }
+          
+          // Si aún no hay imagen válida, usar imagen placeholder genérica
+          if (!imageUrl || imageUrl === '' || imageUrl === 'null') {
+            // Usar SVG inline como placeholder
+            imageUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNjAgNjBIMTQwVjE0MEg2MFY2MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PGNpcmNsZSBjeD0iODAiIGN5PSI4NSIgcj0iMTAiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTYwIDIwMEwxMDAgMTIwTDEyMCAxNDBMMTQwIDkwTDE4MCAxNDBWMjAwSDYwWiIgZmlsbD0iIzlDQTNBRiIvPjx0ZXh0IHg9IjEwMCIgeT0iMTcwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2QjcyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pjwvc3ZnPg==';
+            console.log('Usando SVG placeholder inline');
+          }
+          
+          const productData = {
+            id: product.id,
+            name: productName,
+            price: product.precio ? `ARS ${parseFloat(product.precio).toFixed(2)}` : '',
+            img: imageUrl,
+            store: product.tiendas?.nombre || ''
+          };
+          
+          console.log('=== DATOS FINALES DEL PRODUCTO ===');
+          console.log('ID final:', productData.id);
+          console.log('Nombre final:', productData.name);
+          console.log('Precio final:', productData.price);
+          console.log('Imagen final:', productData.img);
+          console.log('Tienda final:', productData.store);
+          console.log('===================================');
+          productCache.set(id, productData);
+          return productData;
+        } else {
+          console.log('⚠ Respuesta de Supabase sin datos válidos:');
+          console.log('- response.success:', response?.success);
+          console.log('- response.data:', response?.data);
+          console.log('- response.message:', response?.message);
+          console.log('- response.error:', response?.error);
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo producto desde Supabase:', error);
+        console.log('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          productId: id
+        });
+      }
+    } else {
+      console.log('⚠ ProductService no está disponible');
     }
     
-    // Fallback: datos genéricos
-    return { 
+    // Fallback: datos genéricos cuando no se puede obtener desde Supabase
+    const shortId = id.length > 8 ? id.substring(0, 8) + '...' : id;
+    const fallbackData = { 
       id, 
-      name: `Producto #${id}`, 
+      name: `Producto ${shortId}`, 
       price: '', 
-      img: '' 
+      img: '',
+      store: ''
     };
+    
+    console.log(`⚠ Usando datos fallback para UUID ${id}:`, fallbackData);
+    productCache.set(id, fallbackData);
+    return fallbackData;
+    productCache.set(id, fallbackData);
+    return fallbackData;
   }
 
   // Función para renderizar la lista de deseos
-  function renderWishlist() {
+  async function renderWishlist() {
     if (!wlList) return;
     
     const favs = loadFavs();
+    console.log('Favoritos cargados:', favs);
     wlList.innerHTML = '';
     
     if (!favs.length) {
       wlList.innerHTML = `
-        <div style="opacity:.7;padding:20px;text-align:center;">
-          <p>Tu lista está vacía.</p>
-          <small>Agrega productos tocando el ♥ en las cards.</small>
+        <div class="wl-empty">
+          <div class="wl-empty__icon">♥</div>
+          <p class="wl-empty__title">Tu lista está vacía</p>
+          <p class="wl-empty__subtitle">Agrega productos tocando el corazón en las cards</p>
         </div>`;
       return;
     }
-    
-    favs.forEach(id => {
-      const product = getProductDataById(id);
-      const item = document.createElement('div');
-      item.className = 'wl-item';
-      
-      item.innerHTML = `
-        <img alt="${product.name}" src="${product.img || ''}" onerror="this.style.display='none'">
-        <div>
-          <h4>${product.name}</h4>
-          ${product.price ? `<small style="color:#1b7a46;font-weight:700">${product.price}</small>` : ''}
-        </div>
-        <div class="wl-actions">
-          <a class="btn btn-ghost" href="producto.html?id=${encodeURIComponent(id)}">Ver</a>
-          <button class="btn btn-primary" data-remove="${id}">Quitar</button>
-        </div>`;
-      
-      wlList.appendChild(item);
-    });
 
-    // Event listeners para botones "Quitar"
-    wlList.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-remove');
-        let favs = loadFavs().filter(x => String(x) !== String(id));
-        saveFavs(favs);
+    // Mostrar indicador de carga
+    wlList.innerHTML = `
+      <div class="wl-loading">
+        <div class="wl-loading__spinner"></div>
+        <p>Cargando productos...</p>
+      </div>`;
+    
+    try {
+      // Cargar todos los productos favoritos
+      console.log('Obteniendo datos para productos:', favs);
+      const productPromises = favs.map(id => getProductDataById(id));
+      const products = await Promise.all(productPromises);
+      
+      console.log('Productos obtenidos:', products);
+      
+      // Limpiar y renderizar productos
+      wlList.innerHTML = '';
+      
+      products.forEach((product, index) => {
+        const id = favs[index];
+        const item = document.createElement('div');
+        item.className = 'wl-item';
         
-        // Actualizar UI del botón fav si existe
-        const favBtn = document.querySelector(`[data-card-id="${id}"] .fav-btn, [data-product-id="${id}"] .fav-btn`);
-        if (favBtn) {
-          favBtn.classList.remove('active');
-          favBtn.setAttribute('aria-pressed', 'false');
-        }
+        // Generar placeholder si no hay imagen válida
+        const productName = product.name || `Producto #${id}`;
+        const placeholder = productName.charAt(0).toUpperCase();
+        const imageUrl = product.img;
         
-        // Disparar evento de actualización
-        document.dispatchEvent(new CustomEvent('cp:favs:updated'));
-        renderWishlist();
+        // Validar si la imagen es válida
+        const hasValidImage = imageUrl && 
+                            imageUrl !== '' && 
+                            imageUrl !== null && 
+                            imageUrl !== 'null' && 
+                            imageUrl !== 'undefined' && 
+                            typeof imageUrl === 'string' && 
+                            imageUrl.length > 3 && // Mínimo una URL válida
+                            (imageUrl.startsWith('http') || imageUrl.startsWith('https') || 
+                             imageUrl.startsWith('./') || imageUrl.startsWith('../') ||
+                             imageUrl.startsWith('/') || imageUrl.startsWith('data:'));
+        
+        console.log(`\n=== PRODUCTO ${id} ===`);
+        console.log('Nombre:', productName);
+        console.log('URL imagen original:', product.img);
+        console.log('URL imagen procesada:', imageUrl);
+        console.log('¿Imagen válida?:', hasValidImage);
+        console.log('Longitud URL:', imageUrl?.length || 0);
+        console.log('========================\n');
+        
+        item.innerHTML = `
+          <div class="wl-item__image">
+            ${hasValidImage ? 
+              `<img src="${imageUrl}" alt="${productName}" loading="lazy" 
+                   onerror="
+                     console.warn('Error cargando imagen:', '${imageUrl}'); 
+                     this.parentNode.innerHTML='<div class=\"wl-item__placeholder\" title=\"Imagen no disponible\"><span>${placeholder}</span></div>';
+                   ">` : 
+              `<div class="wl-item__placeholder" title="${productName} - Sin imagen"><span>${placeholder}</span></div>`
+            }
+          </div>
+          <div class="wl-item__content">
+            <h4 class="wl-item__name" title="${productName}">${productName}</h4>
+          </div>
+          <div class="wl-item__actions">
+            <button class="wl-item__btn wl-item__btn--view" onclick="window.open('producto.html?id=${encodeURIComponent(id)}', '_blank')" title="Ver producto">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+            <button class="wl-item__btn wl-item__btn--remove" data-remove="${id}" title="Quitar de favoritos">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>`;
+        
+        wlList.appendChild(item);
       });
-    });
+
+      // Event listeners para botones "Quitar"
+      wlList.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-remove');
+          let favs = loadFavs().filter(x => String(x) !== String(id));
+          saveFavs(favs);
+          
+          // Limpiar cache del producto
+          productCache.delete(id);
+          
+          // Actualizar UI del botón fav si existe
+          const favBtn = document.querySelector(`[data-card-id="${id}"] .fav-btn, [data-product-id="${id}"] .fav-btn`);
+          if (favBtn) {
+            favBtn.classList.remove('active');
+            favBtn.setAttribute('aria-pressed', 'false');
+          }
+          
+          // Disparar evento de actualización
+          document.dispatchEvent(new CustomEvent('cp:favs:updated'));
+          renderWishlist();
+        });
+      });
+    } catch (error) {
+      console.error('Error cargando favoritos:', error);
+      wlList.innerHTML = `
+        <div style="opacity:.7;padding:20px;text-align:center;color:#ef4444;">
+          <p>Error al cargar favoritos</p>
+          <small>Intenta de nuevo en unos momentos</small>
+        </div>`;
+    }
   }
 
   // Función para abrir drawer
@@ -1116,6 +1235,11 @@ document.addEventListener('DOMContentLoaded', function() {
       drawer.setAttribute('aria-hidden', 'false');
       btnWl?.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
+      
+      // Debug temporal
+      const favs = loadFavs();
+      console.log('Favoritos cargados:', favs);
+      
       renderWishlist();
     }
   };
@@ -1214,22 +1338,31 @@ document.addEventListener('DOMContentLoaded', function() {
       e.stopPropagation();
       
       const btn = e.target.closest('.fav-btn');
-      const productId = btn.getAttribute('data-product-id');
+      const productId = btn.getAttribute('data-product-id') || btn.getAttribute('data-card-id');
       
-      if (!productId) return;
+      if (!productId) {
+        console.warn('No se encontró ID de producto en el botón de favoritos');
+        return;
+      }
+      
+      console.log('Botón de favoritos clickeado, producto ID:', productId);
       
       let favs = loadFavs();
+      console.log('Favoritos actuales:', favs);
       const isFavorite = favs.includes(String(productId));
       
       if (isFavorite) {
         // Remover de favoritos
         favs = favs.filter(id => String(id) !== String(productId));
+        console.log('Removiendo producto de favoritos');
       } else {
         // Agregar a favoritos
         favs.push(String(productId));
+        console.log('Agregando producto a favoritos');
       }
       
       saveFavs(favs);
+      console.log('Favoritos después del cambio:', favs);
       updateFavoriteButtonsState();
       
       // Disparar evento para actualizar el contador de wishlist

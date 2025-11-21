@@ -121,10 +121,38 @@ class SimpleSupabaseService {
 
       if (error) {
         console.error('❌ Error obteniendo productos destacados:', error);
-        throw error;
+        console.log('🔄 Intentando obtener productos sin filtro destacado...');
+        
+        // Fallback: obtener productos sin filtro de destacado
+        const { data: fallbackData, error: fallbackError } = await client
+          .from('productos')
+          .select(`
+            *,
+            categorias:categoria_id (
+              id,
+              nombre,
+              icono
+            ),
+            tiendas:tienda_id (
+              id,
+              nombre,
+              email
+            )
+          `)
+          .eq('activo', true)
+          .limit(limit)
+          .order('created_at', { ascending: false });
+          
+        if (fallbackError) {
+          console.error('❌ Error en fallback productos destacados:', fallbackError);
+          return { success: false, data: [], error: fallbackError.message };
+        }
+        
+        console.log(`✅ ${fallbackData?.length || 0} productos obtenidos (sin filtro destacado)`);
+        return { success: true, data: fallbackData || [] };
       }
 
-      console.log(`✅ ${data.length} productos destacados obtenidos desde Supabase`);
+      console.log(`✅ ${data?.length || 0} productos destacados obtenidos desde Supabase`);
       return {
         success: true,
         data: data || []
@@ -132,7 +160,63 @@ class SimpleSupabaseService {
 
     } catch (error) {
       console.error('❌ Error obteniendo productos destacados:', error);
-      throw error; // No fallback
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  // Obtener producto por ID
+  static async getProductById(productId) {
+    try {
+      console.log(`📡 Obteniendo producto ${productId} desde Supabase...`);
+      const client = this.getClient();
+
+      const { data, error } = await client
+        .from('productos')
+        .select(`
+          *,
+          categorias:categoria_id (
+            id,
+            nombre,
+            icono
+          ),
+          tiendas:tienda_id (
+            id,
+            nombre,
+            email
+          )
+        `)
+        .eq('id', productId)
+        .single();
+
+      if (error) {
+        console.error('❌ Error obteniendo producto:', error);
+        
+        // Fallback: obtener producto sin relaciones
+        console.log('🔄 Intentando obtener producto sin relaciones...');
+        const { data: fallbackData, error: fallbackError } = await client
+          .from('productos')
+          .select('*')
+          .eq('id', productId)
+          .single();
+          
+        if (fallbackError) {
+          console.error('❌ Error en fallback:', fallbackError);
+          return { success: false, data: null, error: fallbackError.message };
+        }
+        
+        console.log('✅ Producto obtenido (sin relaciones)');
+        return { success: true, data: fallbackData };
+      }
+
+      console.log('✅ Producto obtenido desde Supabase');
+      return {
+        success: true,
+        data: data
+      };
+
+    } catch (error) {
+      console.error('❌ Error obteniendo producto:', error);
+      return { success: false, data: null, error: error.message };
     }
   }
 
@@ -516,6 +600,7 @@ window.SimpleSupabaseService = SimpleSupabaseService;
 window.productService = {
   getAllProducts: () => SimpleSupabaseService.getAllProducts(),
   getFeaturedProducts: (limit) => SimpleSupabaseService.getFeaturedProducts(limit),
+  getProductById: (id) => SimpleSupabaseService.getProductById(id),
   createProduct: (data) => SimpleSupabaseService.createProduct(data),
   uploadProductImage: (file, productName) => SimpleSupabaseService.uploadProductImage(file, productName),
   deleteProductImage: (filePath) => SimpleSupabaseService.deleteProductImage(filePath)

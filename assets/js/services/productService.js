@@ -1,7 +1,7 @@
 // Servicio para gestión de productos con Supabase
 class ProductService {
   constructor() {
-    this.supabase = null;
+    this.supabase = window.supabaseClient || null;
   }
 
   // Inicializar cliente Supabase
@@ -10,7 +10,8 @@ class ProductService {
       this.supabase = window.supabaseClient;
     }
     if (!this.supabase) {
-      throw new Error('Cliente Supabase no disponible');
+      console.warn('Cliente Supabase no disponible en ProductService');
+      return null;
     }
     return this.supabase;
   }

@@ -22,6 +22,42 @@
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3">
+            <!-- Barra de búsqueda global -->
+            <div class="mb-4">
+                <form class="search" role="search" aria-label="Buscar productos" id="searchForm" style="max-width: none; background: #f8f9fa;">
+                    <div class="search__container">
+                        <div class="search__input-wrapper">
+                            <input 
+                                type="search" 
+                                placeholder="Buscar por producto, categoría, tienda" 
+                                aria-label="Buscar producto"
+                                id="searchInput"
+                                autocomplete="off"
+                            />
+                            <button type="button" class="search__clear-btn" id="clearSearchBtn" aria-label="Limpiar búsqueda" style="display: none;">
+                                <span>×</span>
+                            </button>
+                            <button type="submit" class="btn-icon" aria-label="Buscar">
+                                <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+                                    <circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="2"/>
+                                    <line x1="16" y1="16" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Dropdown de sugerencias debajo del input -->
+                        <div class="search__dropdown" id="searchDropdown" style="display: none;">
+                            <div class="search__suggestion-item" id="searchSuggestion">
+                                <span class="search__suggestion-text" id="suggestionText"></span>
+                                <div class="search__loading" id="searchLoading" style="display: none;">
+                                    <div class="search__spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <button onclick="history.back()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -171,6 +207,12 @@
         </a>
     </nav>
 
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="assets/js/config/supabase.js"></script>
+    <script src="assets/js/global-search.js"></script>
     <script src="assets/js/ubicaciones.js"></script>
 </body>
 </html>

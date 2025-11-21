@@ -1,6 +1,6 @@
 /**
  * VENDOR.JS - Lógica para la página de perfil de tienda
- * Maneja la carga de información de tienda individual y sus productos
+ * Maneja la carga de información de tienda individual y sus productos desde Supabase
  */
 
 // Estado global de la aplicación vendor
@@ -9,9 +9,12 @@ const VendorApp = {
   store: null,
   products: [],
   filteredProducts: [],
+  currentPage: 1,
+  itemsPerPage: 12,
   filters: {
     search: '',
-    category: ''
+    category: '',
+    sort: 'name'
   },
 
   // Elementos del DOM
@@ -19,30 +22,28 @@ const VendorApp = {
     vendorLoading: null,
     vendorError: null,
     vendorContent: null,
-    vendorBreadcrumb: null,
-    vendorLogo: null,
-    vendorName: null,
-    vendorCategories: null,
-    vendorRating: null,
-    vendorRatingValue: null,
-    vendorPriceLevel: null,
-    vendorNeighborhood: null,
-    vendorStatus: null,
-    vendorDescription: null,
-    vendorServices: null,
-    vendorPhone: null,
-    vendorAddress: null,
-    vendorInstagram: null,
-    vendorHours: null,
-    btnWhatsapp: null,
-    btnMaps: null,
-    btnWebsite: null,
-    btnContactStore: null,
-    productSearch: null,
-    productCategoryFilter: null,
+    storeBreadcrumb: null,
+    storeLogo: null,
+    storeName: null,
+    storeAlias: null,
+    storeCategories: null,
+    storeRating: null,
+    storeRatingValue: null,
+    storeNeighborhood: null,
+    storeStatus: null,
+    storeDescription: null,
+    contactWhatsApp: null,
+    viewOnMaps: null,
+    vendorSearch: null,
+    categoryFilter: null,
+    sortFilter: null,
     productsLoading: null,
     productsGrid: null,
-    noProducts: null
+    emptyProducts: null,
+    productsPagination: null,
+    prevProductsPage: null,
+    nextProductsPage: null,
+    productsPageInfo: null
   },
 
   // Inicialización
@@ -51,13 +52,32 @@ const VendorApp = {
       this.extractStoreId();
       this.initElements();
       this.bindEvents();
+      
+      // Esperar a que Supabase esté disponible
+      await this.waitForSupabase();
+      
       await this.loadStoreData();
       await this.loadProducts();
       this.renderStore();
       this.renderProducts();
     } catch (error) {
       console.error('Error inicializando vendor:', error);
-      this.showError();
+      this.showError(error.message);
+    }
+  },
+
+  // Esperar a que Supabase esté disponible
+  async waitForSupabase() {
+    let attempts = 0;
+    const maxAttempts = 20;
+    
+    while (!window.supabaseClient && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (!window.supabaseClient) {
+      throw new Error('Supabase no está disponible');
     }
   },
 
@@ -67,7 +87,7 @@ const VendorApp = {
     this.storeId = urlParams.get('id');
     
     if (!this.storeId) {
-      throw new Error('No store ID provided');
+      throw new Error('ID de tienda no proporcionado');
     }
   },
 
@@ -77,301 +97,470 @@ const VendorApp = {
       vendorLoading: document.getElementById('vendorLoading'),
       vendorError: document.getElementById('vendorError'),
       vendorContent: document.getElementById('vendorContent'),
-      vendorBreadcrumb: document.getElementById('vendorBreadcrumb'),
-      vendorLogo: document.getElementById('vendorLogo'),
-      vendorName: document.getElementById('vendorName'),
-      vendorCategories: document.getElementById('vendorCategories'),
-      vendorRating: document.getElementById('vendorRating'),
-      vendorRatingValue: document.getElementById('vendorRatingValue'),
-      vendorPriceLevel: document.getElementById('vendorPriceLevel'),
-      vendorNeighborhood: document.getElementById('vendorNeighborhood'),
-      vendorStatus: document.getElementById('vendorStatus'),
-      vendorDescription: document.getElementById('vendorDescription'),
-      vendorServices: document.getElementById('vendorServices'),
-      vendorPhone: document.getElementById('vendorPhone'),
-      vendorAddress: document.getElementById('vendorAddress'),
-      vendorInstagram: document.getElementById('vendorInstagram'),
-      vendorHours: document.getElementById('vendorHours'),
-      btnWhatsapp: document.getElementById('btnWhatsapp'),
-      btnMaps: document.getElementById('btnMaps'),
-      btnWebsite: document.getElementById('btnWebsite'),
-      btnContactStore: document.getElementById('btnContactStore'),
-      productSearch: document.getElementById('productSearch'),
-      productCategoryFilter: document.getElementById('productCategoryFilter'),
+      storeBreadcrumb: document.getElementById('storeBreadcrumb'),
+      storeLogo: document.getElementById('storeLogo'),
+      storeName: document.getElementById('storeName'),
+      storeAlias: document.getElementById('storeAlias'),
+      storeCategories: document.getElementById('storeCategories'),
+      storeRating: document.getElementById('storeRating'),
+      storeRatingValue: document.getElementById('storeRatingValue'),
+      storeNeighborhood: document.getElementById('storeNeighborhood'),
+      storeStatus: document.getElementById('storeStatus'),
+      storeDescription: document.getElementById('storeDescription'),
+      contactWhatsApp: document.getElementById('contactWhatsApp'),
+      viewOnMaps: document.getElementById('viewOnMaps'),
+      vendorSearch: document.getElementById('vendorSearch'),
+      categoryFilter: document.getElementById('categoryFilter'),
+      sortFilter: document.getElementById('sortFilter'),
       productsLoading: document.getElementById('productsLoading'),
       productsGrid: document.getElementById('productsGrid'),
-      noProducts: document.getElementById('noProducts')
+      emptyProducts: document.getElementById('emptyProducts'),
+      productsPagination: document.getElementById('productsPagination'),
+      prevProductsPage: document.getElementById('prevProductsPage'),
+      nextProductsPage: document.getElementById('nextProductsPage'),
+      productsPageInfo: document.getElementById('productsPageInfo')
     };
   },
 
   // Vincular eventos
   bindEvents() {
-    // Búsqueda de productos
-    if (this.elements.productSearch) {
-      this.elements.productSearch.addEventListener('input', (e) => {
+    // Búsqueda de productos - input en tiempo real
+    if (this.elements.vendorSearch) {
+      this.elements.vendorSearch.addEventListener('input', (e) => {
         this.filters.search = e.target.value.toLowerCase().trim();
-        this.debounceProductFilter();
+        this.debounceFilter();
       });
-    }
-
-    // Filtro de categoría de productos
-    if (this.elements.productCategoryFilter) {
-      this.elements.productCategoryFilter.addEventListener('change', (e) => {
-        this.filters.category = e.target.value;
-        this.filterAndRenderProducts();
-      });
-    }
-
-    // Botón contactar tienda
-    if (this.elements.btnContactStore) {
-      this.elements.btnContactStore.addEventListener('click', () => {
-        if (this.store) {
-          window.open(this.getWhatsAppUrl(), '_blank', 'noopener');
+      
+      // También manejar el evento de envío del formulario
+      const searchForm = this.elements.vendorSearch.closest('form');
+      if (searchForm) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.filters.search = this.elements.vendorSearch.value.toLowerCase().trim();
+          this.applyFiltersAndRender();
+        });
+      }
+      
+      // Evento para limpiar búsqueda con Escape
+      this.elements.vendorSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.elements.vendorSearch.value = '';
+          this.filters.search = '';
+          this.applyFiltersAndRender();
         }
       });
     }
+
+    // Filtros
+    if (this.elements.categoryFilter) {
+      this.elements.categoryFilter.addEventListener('change', (e) => {
+        this.filters.category = e.target.value;
+        this.applyFiltersAndRender();
+      });
+    }
+
+    if (this.elements.sortFilter) {
+      this.elements.sortFilter.addEventListener('change', (e) => {
+        this.filters.sort = e.target.value;
+        this.applyFiltersAndRender();
+      });
+    }
+
+    // Paginación
+    if (this.elements.prevProductsPage) {
+      this.elements.prevProductsPage.addEventListener('click', () => {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+          this.renderProducts();
+        }
+      });
+    }
+
+    if (this.elements.nextProductsPage) {
+      this.elements.nextProductsPage.addEventListener('click', () => {
+        const totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+        if (this.currentPage < totalPages) {
+          this.currentPage++;
+          this.renderProducts();
+        }
+      });
+    }
+    
+    // Botón para limpiar búsqueda
+    const clearSearchBtn = document.getElementById('clearSearch');
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        this.clearFilters();
+      });
+    }
   },
 
-  // Debounce para la búsqueda de productos
-  debounceProductFilter() {
-    clearTimeout(this.productSearchTimeout);
-    this.productSearchTimeout = setTimeout(() => {
-      this.filterAndRenderProducts();
+  // Debounce para filtros
+  debounceFilter() {
+    clearTimeout(this.filterTimeout);
+    this.filterTimeout = setTimeout(() => {
+      this.applyFiltersAndRender();
     }, 300);
   },
 
-  // Cargar datos de la tienda
+  // Aplicar filtros y renderizar
+  applyFiltersAndRender() {
+    this.currentPage = 1;
+    this.applyFilters();
+    this.updateSearchResults();
+    this.renderProducts();
+  },
+
+  // Cargar datos de la tienda desde Supabase
   async loadStoreData() {
     try {
-      const response = await fetch('assets/data/stores.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!window.supabaseClient) {
+        throw new Error('Supabase no está inicializado');
       }
-      const stores = await response.json();
-      this.store = stores.find(store => store.id === this.storeId);
+
+      const storeService = new StoreService();
+      const result = await storeService.getStoreById(this.storeId);
       
-      if (!this.store) {
-        throw new Error('Store not found');
+      if (!result.success || !result.data) {
+        throw new Error('Tienda no encontrada');
       }
+
+      // Transformar datos de Supabase
+      this.store = {
+        id: result.data.id,
+        name: result.data.nombre,
+        alias: result.data.alias || '',
+        description: result.data.descripcion || '',
+        logo: result.data.logo || null,
+        owner: result.data.propietario,
+        email: result.data.email,
+        phone: result.data.telefono || '',
+        address: result.data.direccion || '',
+        neighborhood: result.data.barrio || 'Centro',
+        categories: this.extractCategories(result.data),
+        rating: result.data.calificacion || 4.0,
+        verified: result.data.verificada || false,
+        active: result.data.activa,
+        created_at: result.data.created_at
+      };
+
+      console.log('✅ Tienda cargada:', this.store.name);
+      
     } catch (error) {
-      console.error('Error cargando datos de tienda:', error);
-      throw error;
+      console.error('Error cargando tienda:', error);
+      throw new Error(`Error al cargar la tienda: ${error.message}`);
     }
   },
 
-  // Cargar productos
+  // Cargar productos de la tienda desde Supabase
   async loadProducts() {
     try {
-      const response = await fetch('assets/data/products.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('🔍 Cargando productos para tienda ID:', this.storeId);
+      
+      if (typeof ProductService === 'undefined') {
+        console.warn('⚠️ ProductService no está disponible');
+        this.products = [];
+        this.filteredProducts = [];
+        return;
       }
-      const allProducts = await response.json();
-      this.products = allProducts.filter(product => product.storeId === this.storeId);
+
+      if (!window.supabaseClient) {
+        console.warn('⚠️ Cliente Supabase no disponible para productos');
+        this.products = [];
+        this.filteredProducts = [];
+        return;
+      }
+
+      const productService = new ProductService();
+      const result = await productService.getProductsByStore(this.storeId);
+      
+      if (result.success && result.data && result.data.length > 0) {
+        // Transformar datos de productos
+        this.products = result.data.map(product => ({
+          id: product.id,
+          name: product.nombre,
+          description: product.descripcion || '',
+          price: product.precio,
+          originalPrice: product.precio_original || null,
+          image: product.imagen || 'img/products/placeholder.jpg',
+          category: product.categorias ? product.categorias.nombre : 'General',
+          categoryId: product.categoria_id,
+          storeId: product.tienda_id,
+          stock: product.stock || 0,
+          featured: product.destacado || false,
+          active: product.activo,
+          created_at: product.created_at
+        }));
+        
+        console.log(`✅ ${this.products.length} productos cargados desde Supabase`);
+      } else {
+        console.warn(`⚠️ No se encontraron productos para la tienda ID ${this.storeId}`);
+        this.products = [];
+      }
+      
       this.filteredProducts = [...this.products];
+      this.populateFilters();
+      
     } catch (error) {
       console.error('Error cargando productos:', error);
-      // No lanzar error aquí, solo log - los productos son opcionales
+      this.products = [];
+      this.filteredProducts = [];
     }
   },
 
-  // Renderizar información de la tienda
-  renderStore() {
-    // Ocultar loading y mostrar contenido
-    this.elements.vendorLoading.style.display = 'none';
-    this.elements.vendorContent.style.display = 'block';
-
-    // Breadcrumb
-    this.elements.vendorBreadcrumb.textContent = this.store.name;
-
-    // Logo (placeholder con inicial)
-    this.elements.vendorLogo.src = '';
-    this.elements.vendorLogo.alt = this.store.name;
-    this.elements.vendorLogo.style.display = 'none';
+  // Extraer categorías de los datos
+  extractCategories(store) {
+    const defaultCategories = ['General'];
+    const name = (store.nombre || '').toLowerCase();
+    const desc = (store.descripcion || '').toLowerCase();
     
-    // Crear placeholder de logo
-    const logoPlaceholder = document.createElement('div');
-    logoPlaceholder.className = 'vendor-logo-placeholder';
-    logoPlaceholder.style.cssText = `
-      width: 100%;
-      height: 100%;
-      background: #238a49;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 2rem;
-      font-weight: 600;
-      border-radius: 12px;
-    `;
-    logoPlaceholder.textContent = this.store.name.charAt(0).toUpperCase();
-    this.elements.vendorLogo.parentNode.appendChild(logoPlaceholder);
-
-    // Nombre
-    this.elements.vendorName.textContent = this.store.name;
-
-    // Categorías
-    this.elements.vendorCategories.innerHTML = this.store.categories.map(cat => 
-      `<span class="vendor-info__category">${cat}</span>`
-    ).join('');
-
-    // Rating
-    const fullStars = Math.floor(this.store.rating);
-    const hasHalfStar = this.store.rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
-    let starsHtml = '★'.repeat(fullStars);
-    if (hasHalfStar) starsHtml += '☆';
-    starsHtml += '☆'.repeat(emptyStars);
-
-    this.elements.vendorRating.innerHTML = starsHtml;
-    this.elements.vendorRatingValue.textContent = this.store.rating;
-
-    // Nivel de precio
-    this.elements.vendorPriceLevel.innerHTML = Array.from({length: 4}, (_, i) => 
-      `<span class="vendor-price__symbol ${i < this.store.priceLevel ? '' : 'vendor-price__symbol--inactive'}">$</span>`
-    ).join('');
-
-    // Barrio
-    this.elements.vendorNeighborhood.textContent = this.store.neighborhood;
-
-    // Estado
-    const status = this.getStoreStatus();
-    this.elements.vendorStatus.innerHTML = `
-      <span class="vendor-status__badge vendor-status__badge--${status.class}">
-        ${status.text}
-      </span>
-    `;
-
-    // Descripción
-    this.elements.vendorDescription.textContent = this.store.shortDesc;
-
-    // Servicios
-    const services = [];
-    if (this.store.delivery) services.push('<span class="vendor-service vendor-service--delivery">🚚 Delivery</span>');
-    if (this.store.pickup) services.push('<span class="vendor-service vendor-service--pickup">🏪 Retiro en tienda</span>');
-    if (this.store.warranty) services.push('<span class="vendor-service vendor-service--warranty">🛡️ Garantía</span>');
-    this.elements.vendorServices.innerHTML = services.join('');
-
-    // Contacto
-    this.elements.vendorPhone.querySelector('.vendor-contact__value').textContent = this.store.phone;
-    this.elements.vendorAddress.querySelector('.vendor-contact__value').textContent = this.store.address;
-
-    // Instagram
-    if (this.store.instagram) {
-      this.elements.vendorInstagram.style.display = 'flex';
-      this.elements.vendorInstagram.querySelector('.vendor-contact__link').href = this.store.instagram;
-    }
-
-    // Horarios
-    const daysMap = {
-      mon: 'Lunes',
-      tue: 'Martes', 
-      wed: 'Miércoles',
-      thu: 'Jueves',
-      fri: 'Viernes',
-      sat: 'Sábado',
-      sun: 'Domingo'
+    const categoryMap = {
+      'celular': 'Celulares',
+      'telefono': 'Celulares', 
+      'electronica': 'Electrónica',
+      'computadora': 'Informática',
+      'cosmetica': 'Cosmética',
+      'ropa': 'Indumentaria',
+      'zapato': 'Calzado'
     };
-
-    const currentDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
-
-    this.elements.vendorHours.innerHTML = Object.entries(daysMap).map(([key, label]) => {
-      const hours = this.store.hours[key];
-      const isToday = key === currentDay;
-      const timeClass = hours ? (isToday ? 'vendor-hours__time--today' : '') : 'vendor-hours__time--closed';
-      const timeText = hours || 'Cerrado';
-
-      return `
-        <div class="vendor-hours__item">
-          <span class="vendor-hours__day">${label}</span>
-          <span class="vendor-hours__time ${timeClass}">${timeText}</span>
-        </div>
-      `;
-    }).join('');
-
-    // Botones de acción
-    this.elements.btnWhatsapp.onclick = () => window.open(this.getWhatsAppUrl(), '_blank', 'noopener');
-    this.elements.btnMaps.onclick = () => window.open(this.getMapsUrl(), '_blank', 'noopener');
-
-    if (this.store.website) {
-      this.elements.btnWebsite.style.display = 'block';
-      this.elements.btnWebsite.onclick = () => window.open(this.store.website, '_blank', 'noopener');
-    }
-  },
-
-  // Renderizar productos
-  renderProducts() {
-    // Ocultar loading
-    this.elements.productsLoading.style.display = 'none';
-
-    if (this.products.length === 0) {
-      this.elements.noProducts.style.display = 'block';
-      this.elements.productsGrid.style.display = 'none';
-      return;
-    }
-
-    // Poblar filtro de categorías
-    this.populateProductFilters();
-
-    // Mostrar grid y renderizar productos
-    this.elements.productsGrid.style.display = 'grid';
-    this.elements.noProducts.style.display = 'none';
-    this.filterAndRenderProducts();
-  },
-
-  // Poblar filtros de productos
-  populateProductFilters() {
-    const categories = new Set();
-    this.products.forEach(product => {
-      if (product.category) categories.add(product.category);
+    
+    const detectedCategories = [];
+    Object.keys(categoryMap).forEach(keyword => {
+      if (name.includes(keyword) || desc.includes(keyword)) {
+        detectedCategories.push(categoryMap[keyword]);
+      }
     });
+    
+    return detectedCategories.length > 0 ? detectedCategories : defaultCategories;
+  },
 
-    this.elements.productCategoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
-    [...categories].sort().forEach(category => {
+  // Poblar filtros dinámicamente
+  populateFilters() {
+    if (!this.elements.categoryFilter) return;
+
+    // Obtener categorías únicas de los productos
+    const categories = [...new Set(this.products.map(p => p.category))];
+
+    // Poblar select de categorías
+    this.elements.categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+    categories.sort().forEach(category => {
       const option = document.createElement('option');
       option.value = category;
       option.textContent = category;
-      this.elements.productCategoryFilter.appendChild(option);
+      this.elements.categoryFilter.appendChild(option);
     });
   },
 
-  // Filtrar y renderizar productos
-  filterAndRenderProducts() {
-    // Aplicar filtros
+  // Aplicar filtros
+  applyFilters() {
     this.filteredProducts = this.products.filter(product => {
-      // Filtro de búsqueda
+      // Filtro de búsqueda - buscar en múltiples campos
       if (this.filters.search) {
-        const searchTerm = this.filters.search;
-        const searchableText = `${product.name} ${product.brand || ''} ${product.category || ''}`.toLowerCase();
+        const searchTerm = this.filters.search.toLowerCase();
+        const searchableFields = [
+          product.name || '',
+          product.description || '',
+          product.category || '',
+          product.price ? product.price.toString() : ''
+        ];
+        
+        const searchableText = searchableFields.join(' ').toLowerCase();
+        
         if (!searchableText.includes(searchTerm)) {
           return false;
         }
       }
 
       // Filtro de categoría
-      if (this.filters.category && product.category !== this.filters.category) {
+      if (this.filters.category && product.categoryId !== this.filters.category) {
         return false;
       }
 
       return true;
     });
 
-    // Renderizar
-    this.elements.productsGrid.innerHTML = '';
-    this.filteredProducts.forEach(product => {
-      const productCard = this.createProductCard(product);
-      this.elements.productsGrid.appendChild(productCard);
-    });
+    // Aplicar ordenamiento
+    this.sortProducts();
+    
+    // Log para debugging
+    console.log(`Filtros aplicados: búsqueda="${this.filters.search}", categoría="${this.filters.category}", orden="${this.filters.sort}"`);
+    console.log(`Productos filtrados: ${this.filteredProducts.length} de ${this.products.length}`);
+  },
 
-    // Mostrar/ocultar estado vacío
-    if (this.filteredProducts.length === 0 && (this.filters.search || this.filters.category)) {
-      this.elements.productsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px;">
-          <h3>No se encontraron productos</h3>
-          <p>Intenta ajustar los filtros de búsqueda</p>
-        </div>
+  // Ordenar productos
+  sortProducts() {
+    this.filteredProducts.sort((a, b) => {
+      switch (this.filters.sort) {
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'newest':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+  },
+
+  // Renderizar información de la tienda
+  renderStore() {
+    try {
+      // Ocultar loading y mostrar contenido
+      this.elements.vendorLoading.style.display = 'none';
+      this.elements.vendorContent.style.display = 'block';
+
+      // Actualizar título de la página
+      document.title = `${this.store.name} - Compras Posadas`;
+
+      // Breadcrumb
+      this.elements.storeBreadcrumb.textContent = this.store.name;
+
+      // Logo (placeholder con inicial)
+      const logoPlaceholder = this.store.name.charAt(0).toUpperCase();
+      this.elements.storeLogo.textContent = logoPlaceholder;
+
+      // Información básica
+      this.elements.storeName.textContent = this.store.name;
+      
+      if (this.store.alias) {
+        this.elements.storeAlias.textContent = this.store.alias;
+        this.elements.storeAlias.style.display = 'block';
+      }
+
+      this.elements.storeDescription.textContent = this.store.description;
+      this.elements.storeNeighborhood.textContent = this.store.neighborhood;
+
+      // Categorías
+      const categoriesHtml = this.store.categories.map(category => 
+        `<span class="vendor-category">${category}</span>`
+      ).join('');
+      this.elements.storeCategories.innerHTML = categoriesHtml;
+
+      // Rating
+      const rating = this.store.rating || 4.0;
+      const starsHtml = this.generateStars(rating);
+      this.elements.storeRating.innerHTML = starsHtml;
+      this.elements.storeRatingValue.textContent = rating.toFixed(1);
+
+      // Estado de la tienda
+      const status = this.getStoreStatus();
+      this.elements.storeStatus.innerHTML = `
+        <span class="vendor-status vendor-status--${status.class}">${status.text}</span>
       `;
+
+      // Botones de acción
+      this.setupActionButtons();
+
+    } catch (error) {
+      console.error('Error renderizando tienda:', error);
+      this.showError('Error mostrando información de la tienda');
+    }
+  },
+
+  // Configurar botones de acción
+  setupActionButtons() {
+    // WhatsApp
+    if (this.store.phone) {
+      this.elements.contactWhatsApp.style.display = 'inline-flex';
+      this.elements.contactWhatsApp.onclick = () => {
+        window.open(this.getWhatsAppUrl(), '_blank');
+      };
+    }
+
+    // Maps
+    this.elements.viewOnMaps.onclick = () => {
+      window.open(this.getMapsUrl(), '_blank');
+    };
+  },
+
+  // Generar estrellas de rating
+  generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    let starsHtml = '★'.repeat(fullStars);
+    if (hasHalfStar) starsHtml += '☆';
+    starsHtml += '☆'.repeat(emptyStars);
+    
+    return starsHtml;
+  },
+
+  // Obtener estado de la tienda
+  getStoreStatus() {
+    return { class: 'available', text: 'Contactar' };
+  },
+
+  // Obtener URL de WhatsApp
+  getWhatsAppUrl() {
+    const phone = this.store.phone.replace(/[^0-9]/g, '');
+    const message = encodeURIComponent(`Hola! Vi tu tienda "${this.store.name}" en Compras Posadas y me interesa conocer más sobre sus productos.`);
+    return `https://wa.me/${phone}?text=${message}`;
+  },
+
+  // Obtener URL de Google Maps
+  getMapsUrl() {
+    const searchQuery = this.store.address ? 
+      `${this.store.address}, ${this.store.neighborhood}, Posadas, Misiones` : 
+      `${this.store.name}, Posadas, Misiones`;
+    const query = encodeURIComponent(searchQuery);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  },
+
+  // Renderizar productos
+  renderProducts() {
+    try {
+      // Ocultar loading
+      this.elements.productsLoading.style.display = 'none';
+
+      if (this.filteredProducts.length === 0) {
+        this.elements.productsGrid.style.display = 'none';
+        this.elements.emptyProducts.style.display = 'block';
+        this.elements.productsPagination.style.display = 'none';
+        
+        // Mostrar mensaje apropiado según el contexto
+        const emptyContent = this.elements.emptyProducts.querySelector('.products-empty__content');
+        if (this.filters.search || this.filters.category) {
+          emptyContent.innerHTML = `
+            <h3>No se encontraron productos</h3>
+            <p>
+              ${this.filters.search ? `No hay productos que coincidan con "<strong>${this.filters.search}</strong>"` : ''}
+              ${this.filters.search && this.filters.category ? ' en esta categoría.' : ''}
+              ${!this.filters.search && this.filters.category ? 'No hay productos en esta categoría.' : '.'}
+            </p>
+            <button class="btn btn-ghost" onclick="VendorApp.clearFilters()">Limpiar filtros</button>
+          `;
+        } else {
+          emptyContent.innerHTML = `
+            <h3>No hay productos disponibles</h3>
+            <p>Esta tienda aún no ha agregado productos a su catálogo.</p>
+          `;
+        }
+        return;
+      }
+
+      // Calcular productos de la página actual
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      const pageProducts = this.filteredProducts.slice(startIndex, endIndex);
+
+      // Renderizar productos
+      this.elements.productsGrid.innerHTML = '';
+      pageProducts.forEach(product => {
+        const productCard = this.createProductCard(product);
+        this.elements.productsGrid.appendChild(productCard);
+      });
+
+      this.elements.productsGrid.style.display = 'grid';
+      this.elements.emptyProducts.style.display = 'none';
+
+      // Actualizar paginación
+      this.updatePagination();
+
+    } catch (error) {
+      console.error('Error renderizando productos:', error);
     }
   },
 
@@ -380,83 +569,114 @@ const VendorApp = {
     const card = document.createElement('div');
     card.className = 'product-card';
 
-    // Convertir precio para mostrar en diferentes monedas
-    const usdPrice = product.price;
-    const brlPrice = (usdPrice * 5.46).toFixed(2); // Tasa de cambio aproximada
-    const pygPrice = (usdPrice * 7300).toLocaleString(); // Tasa de cambio aproximada
+    const discountPercentage = product.originalPrice ? 
+      Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
     card.innerHTML = `
       <div class="product-card__image">
         <img src="${product.image}" alt="${product.name}" loading="lazy">
+        ${product.featured ? '<span class="product-card__badge product-card__badge--featured">Destacado</span>' : ''}
+        ${discountPercentage > 0 ? `<span class="product-card__badge product-card__badge--discount">-${discountPercentage}%</span>` : ''}
       </div>
+      
       <div class="product-card__content">
-        <div class="product-card__category">${product.category || 'Sin categoría'}</div>
-        <h4 class="product-card__name">${product.name}</h4>
-        ${product.code ? `<div class="product-card__code">CÓDIGO: ${product.code}</div>` : ''}
-        <div class="product-card__price">U$ ${usdPrice.toFixed(2)}</div>
-        <div style="font-size: 0.8rem; color: #666; line-height: 1.2;">
-          <div>R$ ${brlPrice}</div>
-          <div>G$ ${pygPrice}</div>
+        <h3 class="product-card__title">${product.name}</h3>
+        <p class="product-card__category">${product.category}</p>
+        
+        <div class="product-card__price">
+          <span class="product-card__current-price">$${product.price.toLocaleString('es-AR')}</span>
+          ${product.originalPrice ? `<span class="product-card__original-price">$${product.originalPrice.toLocaleString('es-AR')}</span>` : ''}
         </div>
-        ${product.brand ? `<div class="product-card__brand">${product.brand}</div>` : ''}
+        
+        <div class="product-card__actions">
+          <button class="product-card__btn product-card__btn--primary" onclick="VendorApp.viewProduct('${product.id}')">
+            Ver producto
+          </button>
+          <button class="product-card__btn product-card__btn--wishlist" onclick="VendorApp.toggleWishlist('${product.id}')" title="Agregar a favoritos">
+            ♥
+          </button>
+        </div>
       </div>
     `;
 
     return card;
   },
 
-  // Obtener estado de la tienda
-  getStoreStatus() {
-    const now = new Date();
-    const currentDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()];
-    const currentTime = now.getHours() * 100 + now.getMinutes();
+  // Actualizar paginación
+  updatePagination() {
+    const totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
 
-    const todayHours = this.store.hours[currentDay];
+    if (totalPages <= 1) {
+      this.elements.productsPagination.style.display = 'none';
+      return;
+    }
+
+    this.elements.productsPagination.style.display = 'flex';
+    this.elements.productsPageInfo.textContent = `Página ${this.currentPage} de ${totalPages}`;
     
-    if (!todayHours || todayHours === '') {
-      return { class: 'closed', text: 'Cerrado hoy' };
-    }
+    this.elements.prevProductsPage.disabled = this.currentPage <= 1;
+    this.elements.nextProductsPage.disabled = this.currentPage >= totalPages;
+  },
 
-    const [openTime, closeTime] = todayHours.split('-').map(time => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 100 + minutes;
-    });
-
-    if (currentTime >= openTime && currentTime <= closeTime) {
-      return { class: 'open', text: 'Abierto ahora' };
+  // Actualizar indicador de resultados de búsqueda
+  updateSearchResults() {
+    const searchResults = document.getElementById('searchResults');
+    const searchResultsText = document.getElementById('searchResultsText');
+    
+    if (!searchResults || !searchResultsText) return;
+    
+    if (this.filters.search || this.filters.category) {
+      const totalResults = this.filteredProducts.length;
+      const totalProducts = this.products.length;
+      
+      let text = '';
+      if (this.filters.search && this.filters.category) {
+        text = `${totalResults} de ${totalProducts} productos encontrados para "<strong>${this.filters.search}</strong>" en esta categoría`;
+      } else if (this.filters.search) {
+        text = `${totalResults} de ${totalProducts} productos encontrados para "<strong>${this.filters.search}</strong>"`;
+      } else if (this.filters.category) {
+        const categoryName = this.elements.categoryFilter?.options[this.elements.categoryFilter.selectedIndex]?.text || 'esta categoría';
+        text = `${totalResults} de ${totalProducts} productos en ${categoryName}`;
+      }
+      
+      searchResultsText.innerHTML = text;
+      searchResults.style.display = 'flex';
     } else {
-      return { class: 'closed', text: 'Cerrado' };
+      searchResults.style.display = 'none';
     }
   },
 
-  // Generar URL de WhatsApp
-  getWhatsAppUrl() {
-    const phone = this.store.whatsapp.replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(`Hola! Vi tu tienda "${this.store.name}" en Compras Posadas y me interesa conocer más sobre sus productos.`);
-    return `https://wa.me/${phone}?text=${message}`;
+  // Ver producto (placeholder)
+  viewProduct(productId) {
+    console.log('Ver producto:', productId);
+    // TODO: Implementar navegación a página de producto
   },
 
-  // Generar URL de Google Maps
-  getMapsUrl() {
-    if (this.store.location && this.store.location.lat && this.store.location.lng) {
-      return `https://www.google.com/maps/search/?api=1&query=${this.store.location.lat},${this.store.location.lng}`;
-    } else {
-      const query = encodeURIComponent(`${this.store.address}, Posadas, Misiones`);
-      return `https://www.google.com/maps/search/?api=1&query=${query}`;
-    }
+  // Toggle wishlist (placeholder)
+  toggleWishlist(productId) {
+    console.log('Toggle wishlist:', productId);
+    // TODO: Implementar funcionalidad de wishlist
   },
 
   // Mostrar error
-  showError() {
+  showError(message = 'Error cargando la tienda') {
     this.elements.vendorLoading.style.display = 'none';
     this.elements.vendorContent.style.display = 'none';
     this.elements.vendorError.style.display = 'block';
+    
+    const errorContent = this.elements.vendorError.querySelector('.vendor-error__content h1');
+    if (errorContent) {
+      errorContent.textContent = message;
+    }
   }
 };
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-  VendorApp.init();
+  // Esperar un poco para que Supabase se inicialice
+  setTimeout(() => {
+    VendorApp.init();
+  }, 200);
 });
 
 // Exportar para uso global

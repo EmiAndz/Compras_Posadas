@@ -1,7 +1,7 @@
 // Servicio para gestión de tiendas con Supabase
 class StoreService {
   constructor() {
-    this.supabase = window.supabaseClient
+    this.supabase = window.supabaseClient || window.supabase;
   }
 
   // Obtener todas las tiendas activas

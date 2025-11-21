@@ -125,18 +125,107 @@ const TiendasApp = {
     }, 300);
   },
 
-  // Cargar datos de tiendas
+  // Cargar datos de tiendas desde Supabase
   async loadStores() {
+    try {
+      // Verificar si Supabase está disponible
+      if (!window.supabaseClient) {
+        console.warn('⚠️ Supabase no está configurado, usando datos de respaldo');
+        await this.loadStoresFromJSON();
+        return;
+      }
+
+      const storeService = new StoreService();
+      const result = await storeService.getAllStores();
+      
+      if (result.success && result.data.length > 0) {
+        // Transformar los datos de Supabase al formato esperado
+        this.stores = result.data.map(store => ({
+          id: store.id,
+          name: store.nombre,
+          alias: store.alias || '',
+          description: store.descripcion || '',
+          logo: store.logo || 'img/logo/default-store.png',
+          owner: store.propietario,
+          email: store.email,
+          phone: store.telefono || '',
+          address: store.direccion || '',
+          neighborhood: store.barrio || 'Centro',
+          categories: this.extractCategories(store),
+          rating: store.calificacion || 4.0,
+          verified: store.verificada || false,
+          active: store.activa,
+          created_at: store.created_at
+        }));
+        
+        console.log(`✅ ${this.stores.length} tiendas cargadas desde Supabase`);
+      } else {
+        console.warn('⚠️ No se encontraron tiendas en Supabase, usando datos de respaldo');
+        await this.loadStoresFromJSON();
+      }
+      
+    } catch (error) {
+      console.error('Error cargando tiendas desde Supabase:', error);
+      // Fallback a JSON local
+      await this.loadStoresFromJSON();
+    }
+  },
+
+  // Método de respaldo para cargar desde JSON
+  async loadStoresFromJSON() {
     try {
       const response = await fetch('assets/data/stores.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       this.stores = await response.json();
+      console.log(`📄 ${this.stores.length} tiendas cargadas desde JSON`);
     } catch (error) {
       console.error('Error cargando stores.json:', error);
+      this.stores = [];
       throw error;
     }
+  },
+
+  // Extraer categorías de los datos de la tienda
+  extractCategories(store) {
+    // Si hay categorías específicas en la base de datos, usarlas
+    if (store.categorias && Array.isArray(store.categorias)) {
+      return store.categorias;
+    }
+    
+    // Categorías por defecto basadas en el nombre o descripción
+    const defaultCategories = ['General'];
+    const name = (store.nombre || '').toLowerCase();
+    const desc = (store.descripcion || '').toLowerCase();
+    
+    // Mapeo simple de palabras clave a categorías
+    const categoryMap = {
+      'celular': 'Celulares',
+      'telefono': 'Celulares', 
+      'movil': 'Celulares',
+      'electronica': 'Electrónica',
+      'electronico': 'Electrónica',
+      'computadora': 'Informática',
+      'notebook': 'Informática',
+      'pc': 'Informática',
+      'cosmetica': 'Cosmética',
+      'belleza': 'Cosmética',
+      'maquillaje': 'Cosmética',
+      'ropa': 'Indumentaria',
+      'vestimenta': 'Indumentaria',
+      'zapato': 'Calzado',
+      'zapatilla': 'Calzado'
+    };
+    
+    const detectedCategories = [];
+    Object.keys(categoryMap).forEach(keyword => {
+      if (name.includes(keyword) || desc.includes(keyword)) {
+        detectedCategories.push(categoryMap[keyword]);
+      }
+    });
+    
+    return detectedCategories.length > 0 ? detectedCategories : defaultCategories;
   },
 
   // Poblar filtros dinámicamente
@@ -260,24 +349,26 @@ const TiendasApp = {
     ).join('');
 
     // Generar rating stars
-    const fullStars = Math.floor(store.rating);
-    const hasHalfStar = store.rating % 1 >= 0.5;
+    const rating = store.rating || 4.0;
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     
     let starsHtml = '★'.repeat(fullStars);
     if (hasHalfStar) starsHtml += '☆';
     starsHtml += '☆'.repeat(emptyStars);
 
-    // Generar indicadores de precio
+    // Generar indicadores de precio (usar nivel por defecto si no existe)
+    const priceLevel = store.priceLevel || 2;
     const priceHtml = Array.from({length: 4}, (_, i) => 
-      `<span class="store-card__price-symbol ${i < store.priceLevel ? '' : 'store-card__price-symbol--inactive'}">$</span>`
+      `<span class="store-card__price-symbol ${i < priceLevel ? '' : 'store-card__price-symbol--inactive'}">$</span>`
     ).join('');
 
-    // Generar badges de servicios
+    // Generar badges de servicios (usar valores por defecto)
     const servicesHtml = [];
-    if (store.delivery) servicesHtml.push('<span class="store-card__service store-card__service--delivery">Delivery</span>');
-    if (store.pickup) servicesHtml.push('<span class="store-card__service store-card__service--pickup">Retiro</span>');
-    if (store.warranty) servicesHtml.push('<span class="store-card__service store-card__service--warranty">Garantía</span>');
+    if (store.delivery !== false) servicesHtml.push('<span class="store-card__service store-card__service--delivery">Delivery</span>');
+    if (store.pickup !== false) servicesHtml.push('<span class="store-card__service store-card__service--pickup">Retiro</span>');
+    if (store.warranty !== false) servicesHtml.push('<span class="store-card__service store-card__service--warranty">Garantía</span>');
 
     // Logo placeholder
     const logoPlaceholder = store.name.charAt(0).toUpperCase();
@@ -299,7 +390,7 @@ const TiendasApp = {
       <div class="store-card__meta">
         <div class="store-card__rating">
           <span class="store-card__stars">${starsHtml}</span>
-          <span class="store-card__rating-value">${store.rating}</span>
+          <span class="store-card__rating-value">${rating}</span>
         </div>
         <div class="store-card__price">
           ${priceHtml}
@@ -333,6 +424,11 @@ const TiendasApp = {
 
   // Obtener estado de la tienda (abierto/cerrado)
   getStoreStatus(store) {
+    // Si no hay horarios definidos, mostrar como disponible
+    if (!store.hours || typeof store.hours !== 'object') {
+      return { class: 'available', text: 'Contactar' };
+    }
+
     const now = new Date();
     const currentDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()];
     const currentTime = now.getHours() * 100 + now.getMinutes(); // HHMM format
@@ -343,21 +439,32 @@ const TiendasApp = {
       return { class: 'closed', text: 'Cerrado hoy' };
     }
 
-    const [openTime, closeTime] = todayHours.split('-').map(time => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 100 + minutes;
-    });
+    try {
+      const [openTime, closeTime] = todayHours.split('-').map(time => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 100 + minutes;
+      });
 
-    if (currentTime >= openTime && currentTime <= closeTime) {
-      return { class: 'open', text: 'Abierto ahora' };
-    } else {
-      return { class: 'closed', text: 'Cerrado' };
+      if (currentTime >= openTime && currentTime <= closeTime) {
+        return { class: 'open', text: 'Abierto ahora' };
+      } else {
+        return { class: 'closed', text: 'Cerrado' };
+      }
+    } catch (error) {
+      // Si hay error procesando horarios, mostrar como disponible
+      return { class: 'available', text: 'Contactar' };
     }
   },
 
   // Generar URL de WhatsApp
   getWhatsAppUrl(store) {
-    const phone = store.whatsapp.replace(/[^0-9]/g, '');
+    // Usar telefono si no hay whatsapp específico
+    const phoneField = store.whatsapp || store.phone || store.telefono || '';
+    if (!phoneField) {
+      return '#'; // Sin teléfono disponible
+    }
+    
+    const phone = phoneField.replace(/[^0-9]/g, '');
     const message = encodeURIComponent(`Hola! Vi tu tienda "${store.name}" en Compras Posadas y me interesa conocer más sobre sus productos.`);
     return `https://wa.me/${phone}?text=${message}`;
   },
@@ -367,7 +474,11 @@ const TiendasApp = {
     if (store.location && store.location.lat && store.location.lng) {
       return `https://www.google.com/maps/search/?api=1&query=${store.location.lat},${store.location.lng}`;
     } else {
-      const query = encodeURIComponent(`${store.address}, Posadas, Misiones`);
+      // Usar dirección de la base de datos
+      const address = store.address || store.direccion || '';
+      const neighborhood = store.neighborhood || store.barrio || '';
+      const searchQuery = address ? `${address}, ${neighborhood}, Posadas, Misiones` : `${store.name}, Posadas, Misiones`;
+      const query = encodeURIComponent(searchQuery);
       return `https://www.google.com/maps/search/?api=1&query=${query}`;
     }
   },
@@ -459,8 +570,16 @@ const TiendasApp = {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-  TiendasApp.init();
+  // Esperar un poco para que Supabase se inicialice
+  setTimeout(() => {
+    TiendasApp.init();
+  }, 100);
 });
+
+// También permitir inicialización manual si Supabase se inicializa después
+window.initTiendasApp = () => {
+  TiendasApp.init();
+};
 
 // Exportar para uso global
 window.TiendasApp = TiendasApp;
